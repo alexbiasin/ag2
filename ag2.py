@@ -1,5 +1,8 @@
 # Autor: Alejandro Biasin, 2020
 # AG2 es un upgrade de AG1. Nuevos features:
+#  - Mas object-oriented
+#  - LOAD y SAVE game state
+
 from __future__ import division
 import pygame_textinput
 # https://github.com/Nearoo/pygame-text-input
@@ -86,7 +89,7 @@ class Player(pygame.sprite.Sprite):
         if (x==-1 and y==-1):
             x = self.xfoot
             y = self.yfoot
-        return screenmap.get_at( (x, y) )
+        return self.game.screenmap.get_at( (x, y) )
 
     def getGreenColor(self, color):
         G = color[1]
@@ -123,7 +126,7 @@ class Player(pygame.sprite.Sprite):
         if (G > 100) and (G < 200): 
             blockid = (G - 100) // 10 # decena del color verde
             log('DEBUG','block id: ',blockid)
-            if rooms[currentRoom]['blockages'][str(blockid)]['active'] == True:
+            if self.game.rooms[self.game.currentRoom]['blockages'][str(blockid)]['active'] == True:
                 return True
         return False
 
@@ -246,7 +249,7 @@ class Player(pygame.sprite.Sprite):
                     room = self.changingRoomTo(new_x, new_y)
                     if room > 0:
                         # convertir el numero de salida del mapa grafico a un Room
-                        newRoom = rooms[currentRoom]['directions'][str(room)]
+                        newRoom = self.game.rooms[self.game.currentRoom]['directions'][str(room)]
                         self.game.goToRoom(newRoom) # Interaccion entre clase Sprite y clase Game
                     elif self.canMove(new_x, new_y):
                         self.direction = direction
@@ -273,11 +276,11 @@ class Player(pygame.sprite.Sprite):
     def insideScreen(self, x, y):
         if x <= 0:
             return False
-        if x >= width:
+        if x >= self.game.width:
             return False
         if y <= 0:
             return False
-        if y >= height:
+        if y >= self.game.height:
             return False
         return True
         
@@ -334,42 +337,42 @@ def log(level, *arg):
 class Game(object):
     def main(self, screen):
         # Variables globales
-        global width
-        global height
-        global clock
-        global FPS
-        global inventory
-        global show_inventory
-        global rooms
-        global currentRoom
-        global musica
-        global global_text
-        global show_message
-        global message_time
-        global previoustext
-        global maxstringlength
-        global smallfont
-        global textcolor
-        global cursorcolor
-        global backtextcolor
-        global backinvcolor
-        global backitemcolor
-        global fontsize
-        global run
-        global textinput
-        global textX
-        global textY
-        global textinputX
-        global textinputY
+        #global width
+        #global height
+        #global clock
+        #global FPS
+        #global inventory
+        #global show_inventory
+        #global rooms
+        #global currentRoom
+        #global musica
+        #global global_text
+        #global show_message
+        #global message_time
+        #global previoustext
+        #global maxstringlength
+        #global smallfont
+        #global textcolor
+        #global cursorcolor
+        #global backtextcolor
+        #global backinvcolor
+        #global backitemcolor
+        #global fontsize
+        #global run
+        #global textinput
+        #global textX
+        #global textY
+        #global textinputX
+        #global textinputY
         #global text # TODO: Quitar
-        global player
-        global sprites
-        global keys_allowed
+        #global player
+        #global sprites
+        #global keys_allowed
         global cached_images
         global cached_sounds
-        global dirtyscreen
+        #global dirtyscreen
     #    global log_level
-        global has_audio
+        #global has_audio
 
         self.screen = screen
     #    log_level = 'NONE' # NONE , INFO , DEBUG
@@ -378,51 +381,51 @@ class Game(object):
         #  - se usa Rect para representar la posicion, de un objeto.
         #  - se hereda de pygame.sprite.Sprite para crear sprites, y con Group se los agrupa.
 
-        width = screen.get_width()
-        height = screen.get_height()
+        self.width = screen.get_width()
+        self.height = screen.get_height()
         
         gamename = 'Alex\'s First Graphic Adventure Game, with a twist'
         log('DEBUG','Setting caption')
         pygame.display.set_caption(gamename)
         cached_images = {}
-        dirtyscreen = True
+        self.dirtyscreen = True
         # en vez de pygame.time.delay(100), usar clock para controlar los FPS
         log('DEBUG','Init clock and FPS')
-        clock = pygame.time.Clock()
-        FPS = 15 # Frames per second.
+        self.clock = pygame.time.Clock()
+        self.FPS = 15 # Frames per second.
         # Message Box
-        global_text = ''
-        show_message = False
-        message_time = 0
-        previoustext = ''    
+        self.global_text = ''
+        self.show_message = False
+        self.message_time = 0
+        self.previoustext = ''    
         # defining a font 
         #fontsize = int(40 / screenrel) # para default/none
-        fontsize = int(28 / screenrel) # para Arial
-        maxstringlength = 50
+        self.fontsize = int(28 / screenrel) # para Arial
+        self.maxstringlength = 50
         pygame.font.init()
         #defaultfont =  pygame.font.get_default_font()
         #customfont = defaultfont # 'Corbel'
         #customfont = None
-        customfont = 'Arial'
+        self.customfont = 'Arial'
         log('DEBUG','Setting small Font')
-        smallfont = pygame.font.SysFont(customfont, fontsize)
+        self.smallfont = pygame.font.SysFont(self.customfont, self.fontsize)
         #smallfont = pygame.font.Font(customfont, fontsize)
         log('DEBUG','Setting colors')
-        textcolor = (255, 220, 187) # RGB default textcolor
-        cursorcolor = (187, 220, 255)
-        backtextcolor = (170, 170, 170, 190) # fondo translucido de texto
-        backinvcolor = (87, 27, 71, 150) # fondo translucido de inventario
-        backitemcolor = (142, 67, 192, 190) # fondo translucido de inventario
-        textX = width/3
-        textY = height/3
-        textinputX = 10
-        textinputY = height-fontsize-13
-        show_inventory = False
-        currentRoom = ''
-        run = True
+        self.textcolor = (255, 220, 187) # RGB default textcolor
+        self.cursorcolor = (187, 220, 255)
+        self.backtextcolor = (170, 170, 170, 190) # fondo translucido de texto
+        self.backinvcolor = (87, 27, 71, 150) # fondo translucido de inventario
+        self.backitemcolor = (142, 67, 192, 190) # fondo translucido de inventario
+        self.textX = self.width/3
+        self.textY = self.height/3
+        self.textinputX = 10
+        self.textinputY = self.height-self.fontsize-13
+        self.show_inventory = False
+        self.currentRoom = ''
+        self.run = True
         # Create TextInput-object (3rd party library)
         log('DEBUG','Init textinput')
-        textinput = pygame_textinput.TextInput(text_color = textcolor, cursor_color = cursorcolor, font_family = customfont, font_size = fontsize, max_string_length = maxstringlength)
+        self.textinput = pygame_textinput.TextInput(text_color = self.textcolor, cursor_color = self.cursorcolor, font_family = self.customfont, font_size = self.fontsize, max_string_length = self.maxstringlength)
         
         log('DEBUG','Setting rooms and items')
         self.setRooms()
@@ -433,20 +436,20 @@ class Game(object):
         log('DEBUG','Init sounds')
         try:
             pygame.mixer.init()
-            musica = pygame.mixer.music
-            has_audio = True
+            self.musica = pygame.mixer.music
+            self.has_audio = True
         except Exception as err:
             log('INFO','Error: No audio device')
-            has_audio = False
+            self.has_audio = False
             
         # Setup the player sprite and group
-        player = Player(self)
-        sprites = pygame.sprite.Group(player)
+        self.player = Player(self)
+        self.sprites = pygame.sprite.Group(self.player)
         # start the player in the first room
         self.goToRoom('Forest') # Primer room de la lista    
         # draw the initial screen
         self.draw_screen()
-        keys_allowed = True
+        self.keys_allowed = True
         
         # and let the game begin
         self.gameLoop()
@@ -456,38 +459,38 @@ class Game(object):
         self.globalMessage(randomString(['Bye bye!','We\'ll miss you...','Don\'t be frustrated. You\'ll make it next time.']))
         self.draw_screen()
         sleep(1)
-        if has_audio:
-            musica.stop()
+        if self.has_audio:
+            self.musica.stop()
         pygame.quit()
         quit()
 
     def drawText(self, texto, color, x, y):
-        textosurf = smallfont.render(texto , True , color)
+        textosurf = self.smallfont.render(texto , True , color)
         self.screen.blit(textosurf, (x, y) )
             
     def globalMessage(self,texto):
-        global global_text
-        global show_message
-        global message_time
-        global dirtyscreen
+        #global global_text
+        #global show_message
+        #global message_time
+        #global dirtyscreen
         #global_text = filter_nonprintable(texto)
-        global_text = texto
-        show_message = True
-        dirtyscreen = True
-        message_time = int(2 + math.sqrt(len(global_text)) * (FPS/2)) # tiempo en pantala proporcional al texto
+        self.global_text = texto
+        self.show_message = True
+        self.dirtyscreen = True
+        self.message_time = int(2 + math.sqrt(len(self.global_text)) * (self.FPS/2)) # tiempo en pantala proporcional al texto
 
     def updateMessage(self):
-        global show_message
-        global message_time
-        message_time -= 1
-        if message_time == 0:
-            show_message = False # si la cuenta regresiva termino, quitar mensaje
+        #global show_message
+        #global message_time
+        self.message_time -= 1
+        if self.message_time == 0:
+            self.show_message = False # si la cuenta regresiva termino, quitar mensaje
 
     def drawMessage(self):
         ancho_recuadro = 40 # en caracteres
         aspectw = int(14 / screenrel)
         # TODO: Arreglar ancho cuando hay 2 renglones desproporcionados
-        wrappedlines = textwrap.wrap(global_text, ancho_recuadro, replace_whitespace=False)
+        wrappedlines = textwrap.wrap(self.global_text, ancho_recuadro, replace_whitespace=False)
         lineas_recuadro = len(wrappedlines)
         dw = 5 # delta/margen de ancho
         dh = 5 # delta/margen de alto
@@ -497,14 +500,14 @@ class Game(object):
                 maxlen = len(line)
         #w = (len(global_text)*aspectw + dw) / lineas_recuadro # ancho de la caja de texto (teniendo en cuenta wrap)
         w = int(maxlen * aspectw) + dw
-        fh = fontsize + dh + 4 # alto de una linea de texto
+        fh = self.fontsize + dh + 4 # alto de una linea de texto
         h = fh * lineas_recuadro # altura total del recuadro (teniendo en cuenta wrap)
-        x = width/2 - w/2
-        y = height/2 - h/2
-        self.drawRect(x,y,w,h,backtextcolor) # recuadro de fondo
+        x = self.width/2 - w/2
+        y = self.height/2 - h/2
+        self.drawRect(x,y,w,h,self.backtextcolor) # recuadro de fondo
         i = 0
         for line in wrappedlines:
-            self.drawText(line, textcolor, x+dw, y+dh+i*fh)
+            self.drawText(line, self.textcolor, x+dw, y+dh+i*fh)
             i = i + 1
 
     def procesarComando(self, comando):
@@ -568,20 +571,20 @@ class Game(object):
 
     def comandoLookRoom(self):
         # mostrar descripcion del room actual, y posibles salidas
-        mensaje = rooms[currentRoom]['desc']
+        mensaje = self.rooms[self.currentRoom]['desc']
         # mostrar los items que hay en el room actual
-        if bool(rooms[currentRoom]['items']):
+        if bool(self.rooms[self.currentRoom]['items']):
             mensaje += ' You see '
             i = 0
-            cantitems = len(list(rooms[currentRoom]['items']))
-            for item in rooms[currentRoom]['items']:
+            cantitems = len(list(self.rooms[self.currentRoom]['items']))
+            for item in self.rooms[self.currentRoom]['items']:
                 i += 1
-                if (rooms[currentRoom]['items'][item]['visible'] == True):
+                if (self.rooms[self.currentRoom]['items'][item]['visible'] == True):
                     if i > 1:
                         mensaje += ', '
                         if cantitems == i:
                             mensaje += 'and '
-                    mensaje += rooms[currentRoom]['items'][item]['roomdesc']
+                    mensaje += self.rooms[self.currentRoom]['items'][item]['roomdesc']
                 else:
                     i -= 1
                     cantitems -= 1
@@ -609,39 +612,39 @@ class Game(object):
 
     def comandoLookItem(self,itemstr):
         # el item a mirar puede estar en el inventario o en el room actual
-        if (itemstr in inventory.keys()): # si el item lo tengo yo
-            mensaje = inventory[itemstr]['desc']
+        if (itemstr in self.inventory.keys()): # si el item lo tengo yo
+            mensaje = self.inventory[itemstr]['desc']
         else:
-            if (itemstr in rooms[currentRoom]['items'].keys()): # si el item esta en el room
-                if (rooms[currentRoom]['items'][itemstr]['takeable'] == True):
-                    mensaje = 'You see ' + rooms[currentRoom]['items'][itemstr]['roomdesc']
+            if (itemstr in self.rooms[self.currentRoom]['items'].keys()): # si el item esta en el room
+                if (self.rooms[self.currentRoom]['items'][itemstr]['takeable'] == True):
+                    mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['roomdesc']
                 else:
-                    if rooms[currentRoom]['items'][itemstr]['visible'] == True:
-                        if ('locked' in rooms[currentRoom]['items'][itemstr]) and (rooms[currentRoom]['items'][itemstr]['locked'] == False) and (rooms[currentRoom]['items'][itemstr]['iteminside'] in rooms[currentRoom]['items'].keys()):
-                            mensaje = 'You see ' + rooms[currentRoom]['items'][itemstr]['roomdescunlocked']
+                    if self.rooms[self.currentRoom]['items'][itemstr]['visible'] == True:
+                        if ('locked' in self.rooms[self.currentRoom]['items'][itemstr]) and (self.rooms[self.currentRoom]['items'][itemstr]['locked'] == False) and (self.rooms[self.currentRoom]['items'][itemstr]['iteminside'] in self.rooms[self.currentRoom]['items'].keys()):
+                            mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['roomdescunlocked']
                         else:
-                            mensaje = 'You see ' + rooms[currentRoom]['items'][itemstr]['desc']
+                            mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['desc']
                     else:
                         mensaje = randomString(['I don\'t see any ' + itemstr, 'It may have dissapeared, you know.','Are you sure the '+ itemstr +' is still there?'])
             else:
-                if (itemstr in rooms[currentRoom]['directions'].keys()):
+                if (itemstr in self.rooms[self.currentRoom]['directions'].keys()):
                     mensaje = 'Yes, you can go ' + itemstr
                 else:
                     mensaje = randomString(['The ' + itemstr + ' is not here' , 'I don\'t see any ' + itemstr])
         self.globalMessage(mensaje)
 
     def comandoGetItem(self,itemstr):
-        if (itemstr in inventory.keys()):
+        if (itemstr in self.inventory.keys()):
             mensaje = 'You already have the ' + itemstr
         else:
-            if (itemstr in rooms[currentRoom]['items']) and (rooms[currentRoom]['items'][itemstr]['visible'] == True):
-                if (rooms[currentRoom]['items'][itemstr]['takeable']):
+            if (itemstr in self.rooms[self.currentRoom]['items']) and (self.rooms[self.currentRoom]['items'][itemstr]['visible'] == True):
+                if (self.rooms[self.currentRoom]['items'][itemstr]['takeable']):
                     #add the item to their inventory
-                    inventory[itemstr] = rooms[currentRoom]['items'][itemstr]
+                    self.inventory[itemstr] = self.rooms[self.currentRoom]['items'][itemstr]
                     #display a helpful message
                     mensaje = randomString([itemstr + ' got!','Yeah! You have gotten the '+itemstr,'The '+itemstr+', just what you\'ve been looking for','At last, the glorious '+itemstr ])
                     #delete the item from the room
-                    del rooms[currentRoom]['items'][itemstr]
+                    del self.rooms[self.currentRoom]['items'][itemstr]
                 else:
                     mensaje = randomString(['You can\'t get the ' + itemstr, 'Nah! It\'s like painted to the background', 'You wish!'])
             else:
@@ -652,45 +655,45 @@ class Game(object):
     def comandoUse(self,item1, item2):
         # item1 debe estar en el inventory
         # item2 puede estar en el room (para accionar algo) o en el inventory (para mezclarlos)
-        if (item1 in inventory.keys()):
-            if (item2 in inventory.keys()): # mezclar 2 items del inventory
-                if ('mixwith' in inventory[item1]) and ('mixwith' in inventory[item2])==True and (inventory[item1]['mixwith']['otheritem'] == item2) and (inventory[item2]['mixwith']['otheritem'] == item1):
+        if (item1 in self.inventory.keys()):
+            if (item2 in self.inventory.keys()): # mezclar 2 items del inventory
+                if ('mixwith' in self.inventory[item1]) and ('mixwith' in self.inventory[item2])==True and (self.inventory[item1]['mixwith']['otheritem'] == item2) and (self.inventory[item2]['mixwith']['otheritem'] == item1):
                     # creo el nuevo item
-                    nuevoitem = inventory[item2]['mixwith']['summon']
-                    inventory[nuevoitem] = ghostitems[nuevoitem]
+                    nuevoitem = self.inventory[item2]['mixwith']['summon']
+                    self.inventory[nuevoitem] = self.ghostitems[nuevoitem]
                     # delete both original items from the inventory
-                    del inventory[item1]
-                    del inventory[item2]
-                    del ghostitems[nuevoitem]
+                    del self.inventory[item1]
+                    del self.inventory[item2]
+                    del self.ghostitems[nuevoitem]
                     #display a helpful message
                     #globalMessage('summoned a ' + nuevoitem)
-                    mensaje = inventory[nuevoitem]['summonmessage']
+                    mensaje = self.inventory[nuevoitem]['summonmessage']
                 else:
                     mensaje = randomString(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
-            elif (item2 in rooms[currentRoom]['items']): # accionar algo que esta 'locked'
-                if ('locked' in rooms[currentRoom]['items'][item2]):
-                    if (rooms[currentRoom]['items'][item2]['locked'] == True):
-                        if (item1 == rooms[currentRoom]['items'][item2]['unlockeritem']):
+            elif (item2 in self.rooms[self.currentRoom]['items']): # accionar algo que esta 'locked'
+                if ('locked' in self.rooms[self.currentRoom]['items'][item2]):
+                    if (self.rooms[self.currentRoom]['items'][item2]['locked'] == True):
+                        if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
                             # al accionar item2 con item1, queda visible iteminside
-                            rooms[currentRoom]['items'][item2]['locked'] = False # lo destrabo y queda asi
-                            if ('iteminside' in rooms[currentRoom]['items'][item2]):
-                                iteminside = rooms[currentRoom]['items'][item2]['iteminside']
-                                rooms[currentRoom]['items'][iteminside]['visible'] = True # descubro el iteminside
-                                mensaje = rooms[currentRoom]['items'][item2]['unlockingtext']
+                            self.rooms[self.currentRoom]['items'][item2]['locked'] = False # lo destrabo y queda asi
+                            if ('iteminside' in self.rooms[self.currentRoom]['items'][item2]):
+                                iteminside = self.rooms[self.currentRoom]['items'][item2]['iteminside']
+                                self.rooms[self.currentRoom]['items'][iteminside]['visible'] = True # descubro el iteminside
+                                mensaje = self.rooms[self.currentRoom]['items'][item2]['unlockingtext']
                             else:
-                                mensaje = 'OJO: el iteminside no esta en '+currentRoom # no debiera llegar aca
+                                mensaje = 'OJO: el iteminside no esta en '+self.currentRoom # no debiera llegar aca
                         else:
                             mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
                     else:
                         mensaje = randomString(['Not again!','You\'ve already done that.','Don\'t be repetitive dude!'])
-                elif ('blocked' in rooms[currentRoom]['items'][item2]): # destrabar algo para poder pasar
-                    if (rooms[currentRoom]['items'][item2]['blocked'] == True):
-                        if (item1 == rooms[currentRoom]['items'][item2]['unlockeritem']):
-                            rooms[currentRoom]['items'][item2]['blocked'] = False # destrabo el bloqueo y queda asi
-                            rooms[currentRoom]['items'][item2]['visible'] = False # ya no se ve el bloqueo
-                            blockid = rooms[currentRoom]['items'][item2]['blockid'] # ID del blockage
-                            rooms[currentRoom]['blockages'][blockid]['active'] = False # libero el bloqueo para que el player pueda pasar
-                            mensaje = rooms[currentRoom]['items'][item2]['unlockingtext']
+                elif ('blocked' in self.rooms[self.currentRoom]['items'][item2]): # destrabar algo para poder pasar
+                    if (self.rooms[self.currentRoom]['items'][item2]['blocked'] == True):
+                        if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
+                            self.rooms[self.currentRoom]['items'][item2]['blocked'] = False # destrabo el bloqueo y queda asi
+                            self.rooms[self.currentRoom]['items'][item2]['visible'] = False # ya no se ve el bloqueo
+                            blockid = self.rooms[self.currentRoom]['items'][item2]['blockid'] # ID del blockage
+                            self.rooms[self.currentRoom]['blockages'][blockid]['active'] = False # libero el bloqueo para que el player pueda pasar
+                            mensaje = self.rooms[self.currentRoom]['items'][item2]['unlockingtext']
                         else:
                             mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
                     else:
@@ -705,61 +708,61 @@ class Game(object):
 
     def loadMusic(self,musicpath):
         musicpath_ok = normalizePath(musicpath)
-        if has_audio:
-            musica.load(musicpath_ok)
+        if self.has_audio:
+            self.musica.load(musicpath_ok)
 
     def goToRoom(self,newroom):
-        global currentRoom
-        global background
+        #global currentRoom
+        #global background
         #global textcolor
-        global screenmap
+        #global screenmap
     #    global player
-        global keys_allowed
-        global bckwrel
-        global bckhrel
-        keys_allowed = False
+        #global keys_allowed
+        #global bckwrel
+        #global bckhrel
+        self.keys_allowed = False
         # Cargar fondo en memoria y redimensionarlo para que ocupe la ventana
-        backimage = rooms[newroom]['background']
-        background = pygame.image.load(normalizePath(backimage))
-        background = background.convert() # TEST
-        bckw = background.get_width()
-        bckh = background.get_height()
-        bckwrel = bckw / width
-        bckhrel = bckh / height
-        log('INFO','background original size:', bckw, bckh, bckwrel, bckhrel, width, height)
-        background = pygame.transform.scale(background, (width, height)) # devuelve Surface
+        backimage = self.rooms[newroom]['background']
+        self.background = pygame.image.load(normalizePath(backimage))
+        self.background = self.background.convert() # TEST
+        bckw = self.background.get_width()
+        bckh = self.background.get_height()
+        self.bckwrel = bckw / self.width
+        self.bckhrel = bckh / self.height
+        log('INFO','background original size:', bckw, bckh, self.bckwrel, self.bckhrel, self.width, self.height)
+        self.background = pygame.transform.scale(self.background, (self.width, self.height)) # devuelve Surface
         # Cargar el mapa de escalas correspondiente al fondo
-        imagemap = rooms[newroom]['imagemap']
-        screenmap = pygame.image.load(normalizePath(imagemap))
-        screenmap = screenmap.convert()
-        screenmap = pygame.transform.scale(screenmap, (width, height)) # devuelve Surface
+        imagemap = self.rooms[newroom]['imagemap']
+        self.screenmap = pygame.image.load(normalizePath(imagemap))
+        self.screenmap = self.screenmap.convert()
+        self.screenmap = pygame.transform.scale(self.screenmap, (self.width, self.height)) # devuelve Surface
         # Cargar musica de fondo del room
-        tema = rooms[newroom]['music']
+        tema = self.rooms[newroom]['music']
         #print ('yendo de ' + currentRoom + ' a ' + newroom + ' con tema ' + tema)
         #musica.load(tema)
-        if has_audio:
+        if self.has_audio:
             self.loadMusic(tema)
-            musica.play(-1) # If the loops is -1 then the music will repeat indefinitely.
+            self.musica.play(-1) # If the loops is -1 then the music will repeat indefinitely.
             
         # obtengo coordenadas y direction del player al ingresar a este room desde el anterior
-        if (currentRoom in rooms[newroom]['from']): # si no existe es porque hice loadGame
-            coords = rooms[newroom]['from'][currentRoom]    
-            log('INFO','Yendo de ',currentRoom,' a ',newroom, coords)
+        if (self.currentRoom in self.rooms[newroom]['from']): # si no existe es porque hice loadGame
+            coords = self.rooms[newroom]['from'][self.currentRoom]    
+            log('INFO','Yendo de ',self.currentRoom,' a ',newroom, coords)
             #textcolor = (34, 120, 87)
             # convertir coordenadas externas a internas
             x = self.relativeW(coords[0])
             y = self.relativeH(coords[1])
-            player.setPosition(x, y, coords[2])
-        currentRoom = newroom
-        keys_allowed = True
+            self.player.setPosition(x, y, coords[2])
+        self.currentRoom = newroom
+        self.keys_allowed = True
         
     def relativeW(self,x):
-        log('DEBUG','relativeW: ',x,bckwrel,int(x / bckwrel))
-        return int(x / bckwrel)
+        log('DEBUG','relativeW: ', x, self.bckwrel, int(x / self.bckwrel))
+        return int(x / self.bckwrel)
         
     def relativeH(self,y):
-        log('DEBUG','relativeH: ',y,bckhrel,int(y / bckhrel))
-        return int(y / bckhrel)
+        log('DEBUG','relativeH: ', y, self.bckhrel, int(y / self.bckhrel))
+        return int(y / self.bckhrel)
 
     def drawRect(self,x,y,w,h,color):
         surf = pygame.Surface([w, h], pygame.SRCALPHA)
@@ -772,11 +775,11 @@ class Game(object):
 
     def drawInventory(self):
         # si no tengo nada en el inventario, mostrar mensaje
-        if bool(inventory) == False:
+        if bool(self.inventory) == False:
             self.globalMessage(randomString(['You are carrying nothing!', 'Nothing in your pockets so far', 'Maybe if you start using the "get" command...']))
         else:
             itemsperrow = 2 # max columns
-            listaitems = list(inventory)
+            listaitems = list(self.inventory)
             cantitems = len(listaitems)
             rows = CeilDivision(cantitems, itemsperrow)
             if cantitems > itemsperrow:
@@ -786,15 +789,15 @@ class Game(object):
             pad = 5 # pixels de padding entre objetos
             aspectw = 9
             aspecth = 8
-            itemw = Ceil(width/aspectw)
-            itemh = Ceil(height/aspecth)
+            itemw = Ceil(self.width/aspectw)
+            itemh = Ceil(self.height/aspecth)
             # calcular recuadro en funcion a la cantidad de items
-            fontheight = fontsize + 4
+            fontheight = self.fontsize + 4
             xback = 10
             yback = 10
             wback = (itemw + 2*pad) * cols
             hback = (itemh + 2*pad + fontheight) * rows
-            self.drawRect(xback,yback,wback,hback,backinvcolor) # recuadro de fondo 
+            self.drawRect(xback,yback,wback,hback,self.backinvcolor) # recuadro de fondo 
             
             i = 0 # indice del item en la lista de items
             for r in range(0,rows): # por cada fila del cuadro (comienza desde cero)
@@ -802,52 +805,52 @@ class Game(object):
                     if i < cantitems:
                         x = (xback + pad) + (itemw + pad) * c
                         y = (yback + pad) + (itemh + pad + fontheight) * r
-                        self.drawRect(x,y,itemw,itemh,backitemcolor) # recuadro del item
-                        imagefile = inventory[listaitems[i]]['image']
+                        self.drawRect(x,y,itemw,itemh,self.backitemcolor) # recuadro del item
+                        imagefile = self.inventory[listaitems[i]]['image']
                         self.drawItem(x,y,itemw,itemh,imagefile)
                         xt = x
                         yt = y + itemh + pad
                         item = listaitems[i]
-                        self.drawText(item, textcolor, xt, yt)
+                        self.drawText(item, self.textcolor, xt, yt)
                     i += 1
 
     # Mostrar fondo
     def draw_screen(self):
         # pintar fondo del room en la pantalla
-        self.screen.blit(background, (0, 0))
+        self.screen.blit(self.background, (0, 0))
         #screen.blit(text, (textX, textY) )
 
         # dibujar bloqueos activos
         self.draw_blockages()
 
         # Actualizar sprites
-        sprites.draw(self.screen)
+        self.sprites.draw(self.screen)
 
         # Superponer layers de objetos que tapen al player
         self.draw_layers()
 
         # Caja translucida para el textInput
-        self.drawRect(textinputX-3,textinputY-3,maxstringlength*9,fontsize+8,backtextcolor)
+        self.drawRect(self.textinputX-3, self.textinputY-3, self.maxstringlength*9, self.fontsize+8, self.backtextcolor)
         # Blit textInput surface onto the screen
-        self.screen.blit(textinput.get_surface(), (textinputX, textinputY))
+        self.screen.blit(self.textinput.get_surface(), (self.textinputX, self.textinputY))
 
         # ver donde estan los pies
         #footxy = player.getFootXY()
         #pygame.draw.circle(screen, (255,0,0), (footxy[0],footxy[1]), 3)
         
         # Si el inventario esta activo, mostrarlo
-        if show_inventory == True:
+        if self.show_inventory == True:
             self.drawInventory()
         # Si hay un mensaje global, mostrarlo
-        if show_message == True:
+        if self.show_message == True:
             self.drawMessage()
         # Actualizar pantalla con los elementos de screen
         pygame.display.update()
 
     def draw_layers(self):
-        if ('layers' in rooms[currentRoom].keys()):
+        if ('layers' in self.rooms[self.currentRoom].keys()):
         #if bool(rooms[currentRoom]['layers']):
-            layers = rooms[currentRoom]['layers']
+            layers = self.rooms[self.currentRoom]['layers']
             for layer in layers:
                 #print ( layer )
                 #print ( layers[layer]['z'] )
@@ -856,20 +859,20 @@ class Game(object):
                 xto = self.relativeW( layers[layer]['xto'] )
                 layerimage = layers[layer]['layerimage']
                 # determino si el player se superpone con este layer
-                if player.isEclipsedByLayer(z, xfrom, xto):
+                if self.player.isEclipsedByLayer(z, xfrom, xto):
                     log('DEBUG',layer,z,xfrom,xto,layerimage)
-                    imlayer = loadImage(layerimage, width, height) # devuelve Surface
+                    imlayer = loadImage(layerimage, self.width, self.height) # devuelve Surface
                     self.screen.blit(imlayer, (0, 0))
 
     def draw_blockages(self):
-        if ('blockages' in rooms[currentRoom].keys()):
-            blockages = rooms[currentRoom]['blockages']
+        if ('blockages' in self.rooms[self.currentRoom].keys()):
+            blockages = self.rooms[self.currentRoom]['blockages']
             for blockage in blockages:
                 active = blockages[blockage]['active']
                 # solo dibujo los bloqueos activos
                 if active == True:
                     blockimage = blockages[blockage]['blockimage']
-                    imblock = loadImage(blockimage, width, height) # devuelve Surface
+                    imblock = loadImage(blockimage, self.width, self.height) # devuelve Surface
                     self.screen.blit(imblock, (0, 0))
                         
     # A dictionary linking a room to other rooms. Properties:
@@ -900,8 +903,8 @@ class Game(object):
     #     - mixwith: el otro item con el cual me puedo mergear y summonear uno nuevo (del ghostdict)
     #     - opened: Indica si el item esta abierto.
     def setRooms(self):
-        global rooms
-        rooms = {
+        #global rooms
+        self.rooms = {
             'Forest' : {
                 'desc' : 'You are in a deep and millenary forest.',
                 'background' : 'images/bosque.jpg',
@@ -1204,13 +1207,13 @@ class Game(object):
             }
 
     def setItems(self):
-        global inventory
-        global ghostitems
+        #global inventory
+        #global ghostitems
         # start with nothing on you
-        inventory = {}
+        self.inventory = {}
 
         # dictionary of items that will be available later on
-        ghostitems = {
+        self.ghostitems = {
                 'bayonet' : {
                     'image' : 'images/bayonet.png',
                     'roomdesc' : 'a bayonet',
@@ -1271,72 +1274,72 @@ class Game(object):
             }
 
     def gameLoop(self):
-        global run
-        global textX
-        global textY
-        global show_inventory
-        global textinput
-        global dirtyscreen
-        while run: # Game Loop
-            dt = clock.tick(FPS) / 1000 # Returns milliseconds between each call to 'tick'. The convert time to seconds.
+        #global run
+        #global textX
+        #global textY
+        #global show_inventory
+        #global textinput
+        #global dirtyscreen
+        while self.run: # Game Loop
+            dt = self.clock.tick(self.FPS) / 1000 # Returns milliseconds between each call to 'tick'. The convert time to seconds.
             #pygame.time.delay(100)
-            dirtyscreen = False
+            self.dirtyscreen = False
             events = pygame.event.get() # para el textInput
             
             for event in events:
                 if (event.type == pygame.QUIT):
-                    run = False
+                    self.run = False
                 if (event.type == pygame.KEYUP):
                     if (event.key == pygame.K_ESCAPE):
                         events.remove(event) # no imprimo este caracter
-                        run = False
+                        self.run = False
                     if (event.key == pygame.K_TAB):
-                        show_inventory = False
-                        dirtyscreen = True
+                        self.show_inventory = False
+                        self.dirtyscreen = True
                         events.remove(event) # no imprimo este caracter
                     if (event.key == pygame.K_F1):
                         self.showHelp()
                     if (event.key == pygame.K_F3):
-                        largo = len(previoustext)
+                        largo = len(self.previoustext)
                         if (largo > 0):
-                            textinput.input_string = previoustext # repetir el ultimo comando
-                            textinput.cursor_position = largo
+                            self.textinput.input_string = self.previoustext # repetir el ultimo comando
+                            self.textinput.cursor_position = largo
                 if (event.type == pygame.KEYDOWN):
                     if (event.key == pygame.K_ESCAPE):
                         events.remove(event) # no imprimo este caracter
-                        run = False
+                        self.run = False
                     if (event.key == pygame.K_TAB):
-                        show_inventory = True
-                        dirtyscreen = True
+                        self.show_inventory = True
+                        self.dirtyscreen = True
                         events.remove(event) # no imprimo este caracter
                 
             # Feed textInput with events every frame
-            texto1 = textinput.get_text()
-            if textinput.update(events): # capturar texto con ENTER
-                texto = textinput.get_text()
+            texto1 = self.textinput.get_text()
+            if self.textinput.update(events): # capturar texto con ENTER
+                texto = self.textinput.get_text()
                 #texto = filter_nonprintable(texto)
                 if len(texto)>0:
-                    textinput.clear_text()
+                    self.textinput.clear_text()
                     # Procesar comando ingresado
-                    previoustext = texto
+                    self.previoustext = texto
                     self.procesarComando(texto)
             
-            texto2 = textinput.get_text()
+            texto2 = self.textinput.get_text()
             if texto1 != texto2:
-                dirtyscreen = True
+                self.dirtyscreen = True
             
             player_moved = False
-            if keys_allowed:
+            if self.keys_allowed:
                 keys = pygame.key.get_pressed()
-                player_moved = player.update(keys) # actualizo el sprite jugador segun las teclas
+                player_moved = self.player.update(keys) # actualizo el sprite jugador segun las teclas
                 if player_moved:
-                    dirtyscreen = True
+                    self.dirtyscreen = True
 
-            if show_message:
-                dirtyscreen = True
+            if self.show_message:
+                self.dirtyscreen = True
             self.updateMessage()
             
-            if dirtyscreen: # intentar no refrecar todo el tiempo si no es necesario
+            if self.dirtyscreen: # intentar no refrecar todo el tiempo si no es necesario
                 self.draw_screen()
 
         self.doQuit()
@@ -1346,31 +1349,31 @@ class Game(object):
         # ¿como hacer para guardar estado de los items del room? Por ahora, guardo rooms completo.
         # armo un JSON state que contenga los demas elementos
         state = {}
-        state['inventory'] = inventory
-        state['rooms'] = rooms
-        state['ghostinv'] = ghostitems
-        state['player'] = player.saveState()
-        state['currentRoom'] = currentRoom
+        state['inventory'] = self.inventory
+        state['rooms'] = self.rooms
+        state['ghostinv'] = self.ghostitems
+        state['player'] = self.player.saveState()
+        state['currentRoom'] = self.currentRoom
         print(state) # impresion de Python
         print(json.dumps(state)) # impresion de modulo json
         with open(file, 'w') as outfile:
             json.dump(state, outfile)
         
     def loadGame(self, file='default.json'):
-        global inventory
-        global rooms
-        global ghostitems
+        #global inventory
+        #global rooms
+        #global ghostitems
         log('DEBUG', 'load')
         with open(file) as json_file:
             state = json.load(json_file)
         print(state)
-        inventory = state['inventory']
-        rooms = state['rooms']
-        ghostitems = state['ghostinv']
+        self.inventory = state['inventory']
+        self.rooms = state['rooms']
+        self.ghostitems = state['ghostinv']
         playerstate = state['player']
         room = state['currentRoom']
         self.goToRoom(room)        
-        player.loadState(playerstate)
+        self.player.loadState(playerstate)
         
 def loadImage(imagepath, scale_width=0, scale_height=0):
     # Uso el dictionary cached_images para almacenar filenames en key y pixels de imagen en value.
