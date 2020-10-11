@@ -1,4 +1,4 @@
-from ag1 import main
+from ag2 import main
 
 if __name__ == '__main__':
     main()
