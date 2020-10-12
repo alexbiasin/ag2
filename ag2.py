@@ -402,7 +402,7 @@ class Game(object):
 
     def doQuit(self):
         # Desactivar sonido y video, y salir
-        self.globalMessage(randomString(['Bye bye!','We\'ll miss you...','Don\'t be frustrated. You\'ll make it next time.']))
+        self.globalMessage(rndStrMemory(['Bye bye!','We\'ll miss you...','Don\'t be frustrated. You\'ll make it next time.','Is it bedtime already?']))
         self.draw_screen()
         sleep(1)
         if self.has_audio:
@@ -460,19 +460,21 @@ class Game(object):
             self.saveGame()
             self.globalMessage('Game saved')
         elif words[0] == 'load':
-            self.loadGame()
-            self.globalMessage('Game loaded')
+            if self.loadGame():
+                self.globalMessage('Game loaded')
+            else:
+                self.globalMessage('You have not saved any game before')
         #some fun
         elif words[0] == 'jump':
-            self.globalMessage(randomString(['There is no jumping in this game','This is Kaos. We don\'t jump here!']))
+            self.globalMessage(rndStrMemory(['There is no jumping in this game','This is Kaos. We don\'t jump here!','Jump! Jump! Here comes the man...','You feel exhausted just by thinking of jumping','Wrong game for jumping I think']))
         elif words[0] == 'dive':
-            self.globalMessage(randomString(['Are you nuts?','You should change your pills.','No diving in this area!']))
+            self.globalMessage(rndStrMemory(['Are you nuts?','You should change your pills.','No diving in this area!','There are better moments for diving','I don\'t have my snorkel']))
         elif words[0] == 'sit':
-            self.globalMessage(randomString(['There is no time to be wasting.','Walking is good for your health.','Nah, I don\'t wan\'t to sit, thanks.']))
+            self.globalMessage(rndStrMemory(['There is no time to be wasting','Walking is good for your health.','Nah, I don\'t wan\'t to sit, thanks.','Sit? Am I a dog?','Is that what will let you out of this forest?']))
         elif words[0] == 'sleep':
-            self.globalMessage(randomString(['Come on you lazy cow!','There is no time for a nap','No! Wake up!']))
+            self.globalMessage(rndStrMemory(['Come on you lazy cow!','There is no time for a nap','No! Wake up!','Definitely not!','Let me think... no!','Bored already?']))
         elif words[0] in ('talk','scream','shout'):
-            self.globalMessage(randomString(['Shhh!']))
+            self.globalMessage(rndStrMemory(['Shhh!','No one can hear you','There is no one around','There is no use in talking, screaming or shouting']))
         elif words[0] in ('look','mirar','ver'):
             if len(words) == 1:
                 self.comandoLookRoom()
@@ -487,7 +489,7 @@ class Game(object):
         elif (words[0] == 'use') and (len(words)>3) and (words[2] == 'with'):
             self.comandoUse(words[1], words[3])
         else:
-            self.globalMessage(randomString(['Incorrect command','Not sure what you mean','Try something else']))
+            self.globalMessage(rndStrMemory(['Incorrect command','Not sure what you mean','Try something else']))
 
     def showHelp(self):
     #2345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -496,6 +498,8 @@ class Game(object):
         look [item] : describes an item in your inventory or in the room.               
         get [item] : takes an object of the room and keeps it in your inventory.        
         use [item] with [item] : tries to make an interaction between the two items.    
+        save : records your game so you can play some other day.                     
+        load : restores the game that you had saved before.                         
         F3 : repeats last command.                                                      
         TAB : shows your inventory.                                                     
         """
@@ -507,7 +511,7 @@ class Game(object):
             #set the current room to the new room
             goToRoom( rooms[currentRoom]['directions'][direction] )
         else: # there is no door (link) to the new room
-            self.globalMessage(randomString(['You can\'t go that way!','Really? '+direction+'?','Consider getting a compass','I don\'t think going that way is the right way','Danger! Going that way is demential (because it doesn\'t exists)']))
+            self.globalMessage(rndStrMemory(['You can\'t go that way!','Really? '+direction+'?','Consider getting a compass','I don\'t think going that way is the right way','Danger! Going that way is demential (because it doesn\'t exists)']))
 
     def comandoLookRoom(self):
         # mostrar descripcion del room actual, y posibles salidas
@@ -565,12 +569,12 @@ class Game(object):
                         else:
                             mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['desc']
                     else:
-                        mensaje = randomString(['I don\'t see any ' + itemstr, 'It may have dissapeared, you know.','Are you sure the '+ itemstr +' is still there?'])
+                        mensaje = rndStrMemory(['I don\'t see any ' + itemstr, 'It may have dissapeared, you know.','Are you sure the '+ itemstr +' is still there?'])
             else:
                 if (itemstr in self.rooms[self.currentRoom]['directions'].keys()):
                     mensaje = 'Yes, you can go ' + itemstr
                 else:
-                    mensaje = randomString(['The ' + itemstr + ' is not here' , 'I don\'t see any ' + itemstr])
+                    mensaje = rndStrMemory(['The ' + itemstr + ' is not here' , 'I don\'t see any ' + itemstr])
         self.globalMessage(mensaje)
 
     def comandoGetItem(self,itemstr):
@@ -582,14 +586,14 @@ class Game(object):
                     #add the item to their inventory
                     self.inventory[itemstr] = self.rooms[self.currentRoom]['items'][itemstr]
                     #display a helpful message
-                    mensaje = randomString([itemstr + ' got!','Yeah! You have gotten the '+itemstr,'The '+itemstr+', just what you\'ve been looking for','At last, the glorious '+itemstr ])
+                    mensaje = rndStrMemory([itemstr + ' got!','Yeah! You have gotten the '+itemstr,'The '+itemstr+', just what you\'ve been looking for','At last, the glorious '+itemstr ])
                     #delete the item from the room
                     del self.rooms[self.currentRoom]['items'][itemstr]
                 else:
-                    mensaje = randomString(['You can\'t get the ' + itemstr, 'Nah! It\'s like painted to the background', 'You wish!'])
+                    mensaje = rndStrMemory(['You can\'t get the ' + itemstr, 'Nah! It\'s like painted to the background', 'You wish!'])
             else:
                 #tell them they can't get it
-                mensaje = randomString([itemstr + ' is not here', 'Nah!', 'You wish!'])
+                mensaje = rndStrMemory([itemstr + ' is not here', 'Nah!', 'You wish!'])
         self.globalMessage(mensaje)
         
     def comandoUse(self,item1, item2):
@@ -609,7 +613,7 @@ class Game(object):
                     #globalMessage('summoned a ' + nuevoitem)
                     mensaje = self.inventory[nuevoitem]['summonmessage']
                 else:
-                    mensaje = randomString(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
+                    mensaje = rndStrMemory(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
             elif (item2 in self.rooms[self.currentRoom]['items']): # accionar algo que esta 'locked'
                 if ('locked' in self.rooms[self.currentRoom]['items'][item2]):
                     if (self.rooms[self.currentRoom]['items'][item2]['locked'] == True):
@@ -625,7 +629,7 @@ class Game(object):
                         else:
                             mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
                     else:
-                        mensaje = randomString(['Not again!','You\'ve already done that.','Don\'t be repetitive dude!'])
+                        mensaje = rndStrMemory(['Not again!','You\'ve already done that.','Don\'t be repetitive dude!'])
                 elif ('blocked' in self.rooms[self.currentRoom]['items'][item2]): # destrabar algo para poder pasar
                     if (self.rooms[self.currentRoom]['items'][item2]['blocked'] == True):
                         if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
@@ -637,11 +641,11 @@ class Game(object):
                         else:
                             mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
                     else:
-                        mensaje = randomString(['Are you still seeing that?','You\'ve already done that.','Don\'t be repetitive pal!'])
+                        mensaje = rndStrMemory(['Are you still seeing that?','You\'ve already done that.','Don\'t be repetitive pal!'])
                 else:
-                    mensaje = randomString(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
+                    mensaje = rndStrMemory(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
             else:
-                mensaje = randomString(['There is no ' + item2 + ' around.', 'Try something else.'])
+                mensaje = rndStrMemory(['There is no ' + item2 + ' around.', 'Try something else.'])
         else:
             mensaje = 'You don\'t have any ' + item1
         self.globalMessage(mensaje)
@@ -708,7 +712,7 @@ class Game(object):
     def drawInventory(self):
         # si no tengo nada en el inventario, mostrar mensaje
         if bool(self.inventory) == False:
-            self.globalMessage(randomString(['You are carrying nothing!', 'Nothing in your pockets so far', 'Maybe if you start using the "get" command...']))
+            self.globalMessage(rndStrMemory(['You are carrying nothing!', 'Nothing in your pockets so far', 'Maybe if you start using the "get" command...']))
         else:
             itemsperrow = 2 # max columns
             listaitems = list(self.inventory)
@@ -1284,17 +1288,21 @@ class Game(object):
         
     def loadGame(self, file='default.json'):
         log('DEBUG', 'load')
-        with open(file) as json_file:
-            state = json.load(json_file)
-        log('DEBUG',state)
-        self.inventory = state['inventory']
-        self.rooms = state['rooms']
-        self.ghostitems = state['ghostinv']
-        playerstate = state['player']
-        room = state['currentRoom']
-        self.goToRoom(room)        
-        self.player.loadState(playerstate)
-
+        try:
+            with open(file) as json_file:
+                state = json.load(json_file)
+            log('DEBUG',state)
+            self.inventory = state['inventory']
+            self.rooms = state['rooms']
+            self.ghostitems = state['ghostinv']
+            playerstate = state['player']
+            room = state['currentRoom']
+            self.goToRoom(room)        
+            self.player.loadState(playerstate)
+            return True
+        except IOError:
+            return False
+    
 def log(level, *arg):
     # log_level:
     #   NONE:  no escribir nada
@@ -1350,9 +1358,28 @@ def CeilDivision(number1, number2):
     # -(-3//2) da 2
     return -(-number1 // number2)
 
-# EJ: print (randomString(['uno','dos','tres','cuatro']))
+# EJ: print (rndStrMemory(['uno','dos','tres','cuatro']))
 def randomString(stringList):
     selected = random.choice(stringList)
+    return selected
+
+def rndStrMemory(stringList):
+    global memoryList # dictionary cache de todas las listas de textos. Uso el hash como key
+    key = hash(str(stringList))
+    if key in memoryList:
+        # si existe, obtego la ultima lista recortada
+        shortList = memoryList[key]
+        if len(shortList) == 0: # si ya esta vacia la lista, reiniciarla
+            shortList = stringList
+    else:
+        memoryList[key] = stringList # si no existia, la agrego
+        shortList = stringList
+    # selecciono una opcion de la lista actual
+    selected = randomString(shortList)
+    # recorto la lista para la proxima
+    shortList.remove(selected)
+    # actualizo la lista en el dictionary cacheado
+    memoryList[key] = shortList
     return selected
 
 def filter_nonprintable(texto):
@@ -1365,9 +1392,11 @@ def filter_nonprintable(texto):
 def main():  # type: () -> None
     global log_level
     global screenrel
+    global memoryList
 
     log_level = 'NONE' # NONE , INFO , DEBUG
     screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
+    memoryList = {}
 
     successes, failures = pygame.init() # starts with a hidden window
     # Inicializar PyGame y pantalla
