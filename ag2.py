@@ -489,7 +489,7 @@ class Game(object):
         elif (words[0] == 'use') and (len(words)>3) and (words[2] == 'with'):
             self.comandoUse(words[1], words[3])
         else:
-            self.globalMessage(rndStrMemory(['Incorrect command','Not sure what you mean','Try something else']))
+            self.globalMessage(rndStrMemory(['Incorrect command','Not sure what you mean','Try something else','Hit F1 key for help on commands','That does not compute']))
 
     def showHelp(self):
     #2345678901234567890123456789012345678901234567890123456789012345678901234567890
