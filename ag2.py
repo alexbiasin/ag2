@@ -46,7 +46,12 @@ class Player(pygame.sprite.Sprite):
         
         self.index = 0
         self.scale = 1
-        self.move_step = 5
+        #self.move_step = 5 # fijo
+        self.move_step = 76 # variable mediante DeltaTime, segun clock tick
+        self.framedt = 0.0 # para controlar cuando cambiar (cycle) de frame
+        self.cyclespersec = 12 # cycles a cambiar por segundo
+        self.framethreshold = self.cyclespersec / game.FPS
+        log('DEBUG','PLAYER','move_step:',str(self.move_step),'cps:',str(self.cyclespersec),'threshold:',str(self.framethreshold))
         
         self.image = self.images[0][0] # es de tipo pygame.Surface
         self.rect = pygame.Rect(1,1,150,198)
@@ -154,6 +159,8 @@ class Player(pygame.sprite.Sprite):
         # obtengo el color (R,G,B) en el mapa
         colorxy = self.getColor()
         if self.isPositionAllowed(colorxy):
+            # Actualizo frame del sprite X veces por segundo, segun FPS
+            #if self.framedt >= self.framethreshold:
             newscale = self.getScaleByColor(colorxy)
             if newscale > 0:
                 self.scale = newscale
@@ -211,22 +218,23 @@ class Player(pygame.sprite.Sprite):
             log('DEBUG','scaled by ' , self.scale)
             self.image = pygame.transform.scale(self.image, (new_width, new_height))        
         
-    def update(self, keys):
+    def update(self, keys, dt):
         has_moved = False
+        step = int(self.move_step * dt)
         if 1 in keys: # si hay alguna tecla presionada
             new_x = self.xfoot
             new_y = self.yfoot
             direction = Dir.none
             if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-                new_x -= self.move_step
+                new_x -= step
                 has_moved = True
                 direction = Dir.W
             if keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-                new_x += self.move_step
+                new_x += step
                 has_moved = True
                 direction = Dir.E
             if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
-                new_y -= self.move_step
+                new_y -= step
                 has_moved = True
                 #if direction == Dir.none:
                 direction = Dir.N
@@ -235,7 +243,7 @@ class Player(pygame.sprite.Sprite):
                 #elif direction == Dir.W:
                 #    direction = Dir.NW
             if keys[pygame.K_DOWN] and not keys[pygame.K_UP]:
-                new_y += self.move_step
+                new_y += step
                 has_moved = True
                 #if direction == Dir.none:
                 direction = Dir.S
@@ -245,6 +253,10 @@ class Player(pygame.sprite.Sprite):
                 #    direction = Dir.SW
                 
             if has_moved:
+                #self.framedt += dt
+                self.framedt += self.framethreshold
+                log('DEBUG','dt:',str(dt),'step:',step,'framedt',str(self.framedt))
+                
                 if self.insideScreen(new_x, new_y):
                     room = self.changingRoomTo(new_x, new_y)
                     if room > 0:
@@ -259,14 +271,18 @@ class Player(pygame.sprite.Sprite):
                     log('DEBUG',self.direction)
                 else:
                     has_moved = False
+                if self.framedt >= self.cyclespersec:
+                    self.framedt = 0.0 # reinicio dt de frames
         return has_moved
 
     def cycleImage(self):
-        # if self.direction == Dir.E ...
-        self.index += 1
+        # Actualizo frame del sprite X veces por segundo, segun FPS
+        
+        #if self.framedt >= self.framethreshold:
+        self.index = int(self.framedt)
+            #self.index += 1 # siguiente frame del sprite
         if self.index >= len(self.images[int(self.direction.value)]):
             self.index = 0        
-        #self.image = self.images[self.direction.value][self.index]
         self.updateImage()
     
     def updateImage(self):
@@ -294,88 +310,14 @@ class Player(pygame.sprite.Sprite):
             return False        
         return True
     
-def main():  # type: () -> None
-    global log_level
-    global screenrel
 
-    log_level = 'NONE' # NONE , INFO , DEBUG
-
-    pygame.init() # starts with a hidden window
-    # Inicializar PyGame y pantalla
-    log('DEBUG','Init')
-#    pygame.init()
-    screenrel = 1.5
-    width = int(pygame.display.Info().current_w / screenrel)
-    height = int(pygame.display.Info().current_h / screenrel)
-    # posicionar la ventana centrada
-    log('DEBUG','Center window')
-    xc = ( pygame.display.Info().current_w - width ) / 2
-    yc = ( pygame.display.Info().current_h - height ) / 2
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (xc,yc) 
-    # los doble parentesis son "2-item sequence"
-    log('DEBUG','Setting display mode')
-    screen = pygame.display.set_mode((width, height)) # the screen is a Surface!
-    log('INFO','Initial size: ',(width, height))
-    # Para no tener variables globales, se crea un objeto de una clase, que puede
-    # pasarse como parametro, y usar los metodos de la clase para acceder a sus variables.
-    Game().main(screen)
-    # En vez de Game() podria haber varios Level(), cada uno con un "tipo" de nivel
-    # diferente, que trate los eventos de su game loop de manera distinta; y podrìan incluso
-    # llamarse unos a otros.
-    pygame.quit
-    quit()
-
-def log(level, *arg):
-    # log_level:
-    #   NONE:  no escribir nada
-    #   INFO:  solo infotmativos
-    #   DEBUG: mas informacion para debugear
-    if log_level != 'NONE':
-        if (level == 'INFO') or (log_level == 'DEBUG' and level == 'DEBUG'):
-            print(arg)
-    
 class Game(object):
     def main(self, screen):
         # Variables globales
-        #global width
-        #global height
-        #global clock
-        #global FPS
-        #global inventory
-        #global show_inventory
-        #global rooms
-        #global currentRoom
-        #global musica
-        #global global_text
-        #global show_message
-        #global message_time
-        #global previoustext
-        #global maxstringlength
-        #global smallfont
-        #global textcolor
-        #global cursorcolor
-        #global backtextcolor
-        #global backinvcolor
-        #global backitemcolor
-        #global fontsize
-        #global run
-        #global textinput
-        #global textX
-        #global textY
-        #global textinputX
-        #global textinputY
-        #global text # TODO: Quitar
-        #global player
-        #global sprites
-        #global keys_allowed
         global cached_images
         global cached_sounds
-        #global dirtyscreen
-    #    global log_level
-        #global has_audio
 
         self.screen = screen
-    #    log_level = 'NONE' # NONE , INFO , DEBUG
         # En pygame:
         #  - se usa Surface para representar la "apariencia", y
         #  - se usa Rect para representar la posicion, de un objeto.
@@ -390,9 +332,13 @@ class Game(object):
         cached_images = {}
         self.dirtyscreen = True
         # en vez de pygame.time.delay(100), usar clock para controlar los FPS
-        log('DEBUG','Init clock and FPS')
-        self.clock = pygame.time.Clock()
         self.FPS = 15 # Frames per second.
+        # FPS <-> dt ( la constante es FPS*dt=1 )
+        #  15 <-> 0.066
+        #  20 <-> 0.05
+        #  30 <-> 0.033
+        log('DEBUG','Init clock and FPS',str(self.FPS))
+        self.clock = pygame.time.Clock()
         # Message Box
         self.global_text = ''
         self.show_message = False
@@ -402,12 +348,12 @@ class Game(object):
         #fontsize = int(40 / screenrel) # para default/none
         self.fontsize = int(28 / screenrel) # para Arial
         self.maxstringlength = 50
-        pygame.font.init()
         #defaultfont =  pygame.font.get_default_font()
         #customfont = defaultfont # 'Corbel'
         #customfont = None
         self.customfont = 'Arial'
-        log('DEBUG','Setting small Font')
+        log('DEBUG','Setting small Font',self.customfont,str(self.fontsize))
+        pygame.font.init()
         self.smallfont = pygame.font.SysFont(self.customfont, self.fontsize)
         #smallfont = pygame.font.Font(customfont, fontsize)
         log('DEBUG','Setting colors')
@@ -469,19 +415,13 @@ class Game(object):
         self.screen.blit(textosurf, (x, y) )
             
     def globalMessage(self,texto):
-        #global global_text
-        #global show_message
-        #global message_time
-        #global dirtyscreen
-        #global_text = filter_nonprintable(texto)
+        #self.global_text = filter_nonprintable(texto)
         self.global_text = texto
         self.show_message = True
         self.dirtyscreen = True
         self.message_time = int(2 + math.sqrt(len(self.global_text)) * (self.FPS/2)) # tiempo en pantala proporcional al texto
 
     def updateMessage(self):
-        #global show_message
-        #global message_time
         self.message_time -= 1
         if self.message_time == 0:
             self.show_message = False # si la cuenta regresiva termino, quitar mensaje
@@ -712,14 +652,6 @@ class Game(object):
             self.musica.load(musicpath_ok)
 
     def goToRoom(self,newroom):
-        #global currentRoom
-        #global background
-        #global textcolor
-        #global screenmap
-    #    global player
-        #global keys_allowed
-        #global bckwrel
-        #global bckhrel
         self.keys_allowed = False
         # Cargar fondo en memoria y redimensionarlo para que ocupe la ventana
         backimage = self.rooms[newroom]['background']
@@ -903,7 +835,6 @@ class Game(object):
     #     - mixwith: el otro item con el cual me puedo mergear y summonear uno nuevo (del ghostdict)
     #     - opened: Indica si el item esta abierto.
     def setRooms(self):
-        #global rooms
         self.rooms = {
             'Forest' : {
                 'desc' : 'You are in a deep and millenary forest.',
@@ -1170,7 +1101,7 @@ class Game(object):
                     },
                    'blockage' : {
                        'image' : 'images/xxx.png',
-                       'desc' : 'some magical blockage over the bridge. Yo cannot pass through it.',
+                       'desc' : 'some magical blockage over the bridge. You cannot pass through it.',
                        'roomdesc' : 'a blockage',
                        'visible' : True,
                        'blockid' : '1',
@@ -1207,8 +1138,6 @@ class Game(object):
             }
 
     def setItems(self):
-        #global inventory
-        #global ghostitems
         # start with nothing on you
         self.inventory = {}
 
@@ -1274,12 +1203,6 @@ class Game(object):
             }
 
     def gameLoop(self):
-        #global run
-        #global textX
-        #global textY
-        #global show_inventory
-        #global textinput
-        #global dirtyscreen
         while self.run: # Game Loop
             dt = self.clock.tick(self.FPS) / 1000 # Returns milliseconds between each call to 'tick'. The convert time to seconds.
             #pygame.time.delay(100)
@@ -1331,7 +1254,7 @@ class Game(object):
             player_moved = False
             if self.keys_allowed:
                 keys = pygame.key.get_pressed()
-                player_moved = self.player.update(keys) # actualizo el sprite jugador segun las teclas
+                player_moved = self.player.update(keys, dt) # actualizo el sprite jugador segun las teclas
                 if player_moved:
                     self.dirtyscreen = True
 
@@ -1354,19 +1277,16 @@ class Game(object):
         state['ghostinv'] = self.ghostitems
         state['player'] = self.player.saveState()
         state['currentRoom'] = self.currentRoom
-        print(state) # impresion de Python
-        print(json.dumps(state)) # impresion de modulo json
+        #print(state) # impresion de Python
+        log('DEBUG',json.dumps(state)) # impresion de modulo json
         with open(file, 'w') as outfile:
             json.dump(state, outfile)
         
     def loadGame(self, file='default.json'):
-        #global inventory
-        #global rooms
-        #global ghostitems
         log('DEBUG', 'load')
         with open(file) as json_file:
             state = json.load(json_file)
-        print(state)
+        log('DEBUG',state)
         self.inventory = state['inventory']
         self.rooms = state['rooms']
         self.ghostitems = state['ghostinv']
@@ -1374,7 +1294,16 @@ class Game(object):
         room = state['currentRoom']
         self.goToRoom(room)        
         self.player.loadState(playerstate)
-        
+
+def log(level, *arg):
+    # log_level:
+    #   NONE:  no escribir nada
+    #   INFO:  solo infotmativos
+    #   DEBUG: mas informacion para debugear
+    if log_level != 'NONE':
+        if (level == 'INFO') or (log_level == 'DEBUG' and level == 'DEBUG'):
+            print(arg)
+    
 def loadImage(imagepath, scale_width=0, scale_height=0):
     # Uso el dictionary cached_images para almacenar filenames en key y pixels de imagen en value.
     # Reemplazo las llamadas a pygame.image.load()
@@ -1433,6 +1362,36 @@ def filter_nonprintable(texto):
     log('DEBUG','despues: '+textof)
     return textof
 
+def main():  # type: () -> None
+    global log_level
+    global screenrel
+
+    log_level = 'NONE' # NONE , INFO , DEBUG
+    screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
+
+    successes, failures = pygame.init() # starts with a hidden window
+    # Inicializar PyGame y pantalla
+    log('DEBUG','PyGame Init', 'Successes: '+str(successes), 'Failures: '+str(failures))
+    screenw = pygame.display.Info().current_w
+    screenh = pygame.display.Info().current_h
+    width = int(screenw / screenrel)
+    height = int(screenh / screenrel)
+    # posicionar la ventana centrada
+    xc = ( pygame.display.Info().current_w - width ) / 2
+    yc = ( pygame.display.Info().current_h - height ) / 2
+    log('DEBUG','Center window','x:'+str(xc),'y:'+str(yc))
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (xc,yc) 
+    # los doble parentesis son "2-item sequence"
+    log('INFO','Setting display mode','window:',(width, height),'screen:',(screenw,screenh))
+    screen = pygame.display.set_mode((width, height)) # the screen is a Surface!
+    # Para no tener variables globales, se crea un objeto de una clase, que puede
+    # pasarse como parametro, y usar los metodos de la clase para acceder a sus variables.
+    Game().main(screen)
+    # En vez de Game() podria haber varios Level(), cada uno con un "tipo" de nivel
+    # diferente, que trate los eventos de su game loop de manera distinta; y podrìan incluso
+    # llamarse unos a otros.
+    pygame.quit
+    quit()
 
 if __name__ == "__main__":
     main()
