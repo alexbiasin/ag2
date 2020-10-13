@@ -18,6 +18,9 @@ import unicodedata
 import os # para posicionar la ventana
 from enum import Enum
 import json # para guardar y cargar estado
+import bz2
+import pickle # grabar objetos en archivos
+import _pickle as cPickle
 
 # Opening JSON file 
 #import json 
@@ -1283,14 +1286,20 @@ class Game(object):
         state['currentRoom'] = self.currentRoom
         #print(state) # impresion de Python
         log('DEBUG',json.dumps(state)) # impresion de modulo json
-        with open(file, 'w') as outfile:
-            json.dump(state, outfile)
-        
+        if False:
+            with open(file, 'w') as outfile:
+                json.dump(state, outfile)
+        else:
+            compressed_pickle(file, state)
+            
     def loadGame(self, file='default.json'):
         log('DEBUG', 'load')
         try:
-            with open(file) as json_file:
-                state = json.load(json_file)
+            if False:
+                with open(file) as json_file:
+                    state = json.load(json_file)
+            else:
+                state = decompress_pickle(file)
             log('DEBUG',state)
             self.inventory = state['inventory']
             self.rooms = state['rooms']
@@ -1388,6 +1397,19 @@ def filter_nonprintable(texto):
     textof = ''.join(c for c in texto if not unicodedata.category(c).startswith('C'))
     log('DEBUG','despues: '+textof)
     return textof
+
+# Pickle a file and then compress it into a file with extension 
+def compressed_pickle(file, data):
+    ext = '.pbz2'
+    with bz2.BZ2File(file + ext, 'w') as f: 
+        cPickle.dump(data, f)
+
+# Load any compressed pickle file
+def decompress_pickle(file):
+    ext = '.pbz2'
+    data = bz2.BZ2File(file + ext, 'rb')
+    data = cPickle.load(data)
+    return data
 
 def main():  # type: () -> None
     global log_level
