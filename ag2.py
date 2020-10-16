@@ -358,11 +358,13 @@ class Game(object):
         log('DEBUG','Setting small Font',self.customfont,str(self.fontsize))
         pygame.font.init()
         self.smallfont = pygame.font.SysFont(self.customfont, self.fontsize)
+        #self.borderfont = pygame.font.SysFont(self.customfont, self.fontsize+2)
         #smallfont = pygame.font.Font(customfont, fontsize)
         log('DEBUG','Setting colors')
         self.textcolor = (255, 220, 187) # RGB default textcolor
         self.cursorcolor = (187, 220, 255)
         self.backtextcolor = (170, 170, 170, 190) # fondo translucido de texto
+        self.textbordercolor = (30, 30, 30)
         self.backinvcolor = (87, 27, 71, 150) # fondo translucido de inventario
         self.backitemcolor = (142, 67, 192, 190) # fondo translucido de inventario
         self.textX = self.width/3
@@ -416,7 +418,39 @@ class Game(object):
     def drawText(self, texto, color, x, y):
         textosurf = self.smallfont.render(texto , True , color)
         self.screen.blit(textosurf, (x, y) )
-            
+
+    def drawTextOutline(self, texto : str, color, bordercolor, x, y, bold : bool, outline: int):
+        font = self.smallfont
+        font.set_bold(bold)
+        centeredxy = False
+        if outline > 0:
+            outlineSurf = font.render(texto, True, bordercolor)
+            outlineSize = outlineSurf.get_size()
+            textSurf = pygame.Surface((outlineSize[0] + outline*2, outlineSize[1] + 2*outline))
+            textRect = textSurf.get_rect()
+            offsets = [(ox, oy) 
+                for ox in range(-outline, 2*outline, outline)
+                for oy in range(-outline, 2*outline, outline)
+                if ox != 0 or ox != 0]
+            for ox, oy in offsets:   
+                px, py = textRect.center
+                textSurf.blit(outlineSurf, outlineSurf.get_rect(center = (px+ox, py+oy))) 
+            innerText = font.render(texto, True, color).convert_alpha()
+            textSurf.blit(innerText, innerText.get_rect(center = textRect.center)) 
+        else:
+            textSurf = font.render(texto, True, color)
+            textRect = textSurf.get_rect()    
+
+        BLACK = (0, 0, 0)
+        textSurf.set_colorkey(BLACK) # Black colors will not be blit.
+
+        if centeredxy:
+            textRect.center = (x,y)
+        else:
+            textRect.x = x
+            textRect.y = y
+        self.screen.blit(textSurf, textRect)
+
     def globalMessage(self,texto):
         #self.global_text = filter_nonprintable(texto)
         self.global_text = texto
@@ -430,6 +464,7 @@ class Game(object):
             self.show_message = False # si la cuenta regresiva termino, quitar mensaje
 
     def drawMessage(self):
+        con_recuadro = False
         ancho_recuadro = 40 # en caracteres
         aspectw = int(14 / screenrel)
         # TODO: Arreglar ancho cuando hay 2 renglones desproporcionados
@@ -447,10 +482,12 @@ class Game(object):
         h = fh * lineas_recuadro # altura total del recuadro (teniendo en cuenta wrap)
         x = self.width/2 - w/2
         y = self.height/2 - h/2
-        self.drawRect(x,y,w,h,self.backtextcolor) # recuadro de fondo
+        if con_recuadro:
+            self.drawRect(x,y,w,h,self.backtextcolor) # recuadro de fondo
         i = 0
         for line in wrappedlines:
-            self.drawText(line, self.textcolor, x+dw, y+dh+i*fh)
+            #self.drawText(line, self.textcolor, x+dw, y+dh+i*fh)
+            self.drawTextOutline(line, self.textcolor, self.textbordercolor, x+dw, y+dh+i*fh, True, 2)
             i = i + 1
 
     def procesarComando(self, comando):
