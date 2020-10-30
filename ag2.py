@@ -53,9 +53,12 @@ class Player(pygame.sprite.Sprite):
         self.move_step = 76 # variable mediante DeltaTime, segun clock tick
         self.framedt = 0.0 # para controlar cuando cambiar (cycle) de frame
         self.cyclespersec = 12 # cycles a cambiar por segundo
-        self.framethreshold = self.cyclespersec / game.FPS
-        log('DEBUG','PLAYER','move_step:',str(self.move_step),'cps:',str(self.cyclespersec),'threshold:',str(self.framethreshold))
+        self.framedelta = self.cyclespersec / game.FPS
+        log('DEBUG','PLAYER','move_step:',str(self.move_step),'cps:',str(self.cyclespersec),'threshold:',str(self.framedelta))
         
+        self.walking = False
+        self.stepxy = (0,0)
+
         self.image = self.images[0][0] # es de tipo pygame.Surface
         self.rect = pygame.Rect(1,1,150,198)
         #self.rect = self.image.get_rect() # Get rect of some size as 'image'.
@@ -97,20 +100,12 @@ class Player(pygame.sprite.Sprite):
         if (x==-1 and y==-1):
             x = self.xfoot
             y = self.yfoot
-        return self.game.screenmap.get_at( (x, y) )
+        return self.game.getColor((x, y))
 
-    def getGreenColor(self, color):
-        G = color[1]
-        return G
-    
-    def getBlueColor(self, color):
-        B = color[2]
-        return B
-        
     def getScaleByColor(self, color):
         minscale = 0.1 # para que al menos siempre sea visible
         errorscale = 0.01 # si es menor a esto, hay algo raro!
-        scale = self.getBlueColor(color) / 200 # escala del sprite segun tono de azul del mapa
+        scale = getBlueColor(color) / 200 # escala del SPRITE segun tono de azul del mapa
         if scale < minscale:
             if scale < errorscale:
                 scale = 0
@@ -118,25 +113,7 @@ class Player(pygame.sprite.Sprite):
             else:
                 log('DEBUG','minscale! ',scale, ' con color ',color)
                 scale = minscale
-        return scale
-    
-    def isPositionAllowed(self, color):
-        B = self.getBlueColor(color)
-        if B == 0: # B=0 es una posicion prohibida, no debiera llegar aca!
-            return False
-        if self.isPositionBlocked(color):
-            return False # blocking object active, cant pass throught!
-        return True
-
-
-    def isPositionBlocked(self, color):
-        G = self.getGreenColor(color)
-        if (G > 100) and (G < 200): 
-            blockid = (G - 100) // 10 # decena del color verde
-            log('DEBUG','block id: ',blockid)
-            if self.game.rooms[self.game.currentRoom]['blockages'][str(blockid)]['active'] == True:
-                return True
-        return False
+        return scale    
 
     def isEclipsedByLayer(self, z, xfrom, xto):
         # Z es una coordenada externa que determina si se eclipsa la Y del player
@@ -149,21 +126,12 @@ class Player(pygame.sprite.Sprite):
                 return True
         return False
 
-    def changingRoomTo(self, x, y):
-        color = self.getColor(x, y)
-        G = self.getGreenColor(color)
-        # G = 200 + room_number * 10 + descarte (tomo la decena)
-        if (G == 0) or (G < 200): 
-            return 0 # no cambia de room
-        room = (G - 200) // 10
-        return room
-
     def setRectByFootAndScale(self):
         # obtengo el color (R,G,B) en el mapa
         colorxy = self.getColor()
-        if self.isPositionAllowed(colorxy):
+        if self.game.isPositionAllowed(colorxy):
             # Actualizo frame del sprite X veces por segundo, segun FPS
-            #if self.framedt >= self.framethreshold:
+            #if self.framedt >= self.framedelta:
             newscale = self.getScaleByColor(colorxy)
             if newscale > 0:
                 self.scale = newscale
@@ -180,7 +148,7 @@ class Player(pygame.sprite.Sprite):
     def moveRectTo(self, x, y):
         self.rect.x = x # no funciona el metodo rect.move(x,y)
         self.rect.y = y
-        log('DEBUG','rect moved to ',x,y)
+        #log('DEBUG','rect moved to ',x,y)
 
     def setPosition(self, x, y, direction):
         self.direction = direction
@@ -210,6 +178,16 @@ class Player(pygame.sprite.Sprite):
     def getFootXY(self):
         return (self.xfoot, self.yfoot)
 
+    def walkTo(self, waypoints):
+        self.stepxy = (0,0)
+        aux = waypoints.pop(0) # quito el primer wp ya que es el origen
+        self.waypoints = waypoints
+        self.walking = True
+
+    def stopWalking(self):
+        self.walking = False
+        self.stepxy = (0,0)
+
     def scaleImage(self):
         cur_width = self.image.get_width()
         cur_height = self.image.get_height()
@@ -218,7 +196,7 @@ class Player(pygame.sprite.Sprite):
         dx = cur_width - new_width
         dy = cur_height - new_height
         if (dx != 0 or dy != 0):
-            log('DEBUG','scaled by ' , self.scale)
+            #log('DEBUG','scaled by ' , self.scale)
             self.image = pygame.transform.scale(self.image, (new_width, new_height))        
         
     def update(self, keys, dt):
@@ -255,33 +233,76 @@ class Player(pygame.sprite.Sprite):
                 #elif direction == Dir.W:
                 #    direction = Dir.SW
                 
-            if has_moved:
-                #self.framedt += dt
-                self.framedt += self.framethreshold
-                log('DEBUG','dt:',str(dt),'step:',step,'framedt',str(self.framedt))
+        if self.walking:
+            direction = self.direction
+            if self.stepxy == (0,0): # nunca se movio o debe tomar un nuevo waypoint
+                self.waypoint = self.waypoints.pop(0) # primer waypoint
+                wayxy = self.getFootXY() # obtengo coord actuales
+                self.wayx = wayxy[0]
+                self.wayy = wayxy[1]
+                dxy = deltaXY(wayxy, self.waypoint)
+                self.stepxy = relStepXY(step, dxy)
+                log('DEBUG','Player con nuevo waypoint',self.waypoint)
+                # defino la direccion en base al deltaxy
+                if abs(dxy[0]) > abs(dxy[1]): # mueve mas en X
+                    if dxy[0] > 0:
+                        direction = Dir.E
+                    else:
+                        direction = Dir.W
+                else: # mueve mas en Y
+                    if dxy[1] > 0:
+                        direction = Dir.S
+                    else:
+                        direction = Dir.N
                 
-                if self.insideScreen(new_x, new_y):
-                    room = self.changingRoomTo(new_x, new_y)
-                    if room > 0:
-                        # convertir el numero de salida del mapa grafico a un Room
-                        newRoom = self.game.rooms[self.game.currentRoom]['directions'][str(room)]
-                        self.game.goToRoom(newRoom) # Interaccion entre clase Sprite y clase Game
-                    elif self.canMove(new_x, new_y):
-                        self.direction = direction
-                        self.cycleImage()                
-                        self.moveFeetTo(new_x, new_y)
-                        self.setRectByFootAndScale()
-                    log('DEBUG',self.direction)
+            # NOTA: tuples are immutable
+            
+            # muevo hacia el waypoint
+            self.wayx = self.wayx + self.stepxy[0] # mantengo estas coord con decimales
+            self.wayy = self.wayy + self.stepxy[1]
+            new_x = Ceil(self.wayx)
+            new_y = Ceil(self.wayy)
+            # veo si ya llego al waypoint
+            dist = lengthXY((new_x,new_y), self.waypoint)
+            #log('DEBUG','dist',dist)
+            has_moved = True
+            if dist < step: # llego a un waypoint
+                if len(self.waypoints) > 0:
+                    self.stepxy = (0,0)
                 else:
-                    has_moved = False
-                if self.framedt >= self.cyclespersec:
-                    self.framedt = 0.0 # reinicio dt de frames
+                    self.stopWalking()
+                
+        if has_moved:
+            #self.framedt += dt
+            self.framedt += self.framedelta
+            #log('DEBUG','dt:',str(dt),'step:',step,'framedt',str(self.framedt))
+            
+            if self.insideScreen(new_x, new_y):
+                room = self.game.changingRoomTo((new_x, new_y))
+                if room > 0:
+                    # convertir el numero de salida del mapa grafico a un Room
+                    newRoom = self.game.rooms[self.game.currentRoom]['directions'][str(room)]
+                    self.game.goToRoom(newRoom) # Interaccion entre clase Sprite y clase Game
+                elif self.canMove(new_x, new_y):
+                    self.direction = direction
+                    self.cycleImage()                
+                    self.moveFeetTo(new_x, new_y)
+                    self.setRectByFootAndScale()
+                #log('DEBUG',self.direction)
+            else:
+                has_moved = False
+            if self.framedt >= self.cyclespersec:
+                self.framedt = 0.0 # reinicio dt de frames
+                
+        if has_moved == False:
+            self.stopWalking()
+            
         return has_moved
-
+    
     def cycleImage(self):
         # Actualizo frame del sprite X veces por segundo, segun FPS
         
-        #if self.framedt >= self.framethreshold:
+        #if self.framedt >= self.framedelta:
         self.index = int(self.framedt)
             #self.index += 1 # siguiente frame del sprite
         if self.index >= len(self.images[int(self.direction.value)]):
@@ -309,7 +330,7 @@ class Player(pygame.sprite.Sprite):
             return False
         # no permitir si ingresa a una zona del mapa no permitida (en negro)
         colorxy = self.getColor(x, y)
-        if self.isPositionAllowed(colorxy) == False:
+        if self.game.isPositionAllowed(colorxy) == False:
             return False        
         return True
     
@@ -419,10 +440,9 @@ class Game(object):
         textosurf = self.smallfont.render(texto , True , color)
         self.screen.blit(textosurf, (x, y) )
 
-    def drawTextOutline(self, texto : str, color, bordercolor, x, y, bold : bool, outline: int):
+    def drawTextOutline(self, texto : str, color, bordercolor, x, y, bold : bool, outline: int, centeredxy = False):
         font = self.smallfont
-        font.set_bold(bold)
-        centeredxy = False
+        font.set_bold(bold)        
         if outline > 0:
             outlineSurf = font.render(texto, True, bordercolor)
             outlineSize = outlineSurf.get_size()
@@ -441,7 +461,7 @@ class Game(object):
             textSurf = font.render(texto, True, color)
             textRect = textSurf.get_rect()    
 
-        BLACK = (0, 0, 0)
+        BLACK = (0, 0, 0) # sin esto, aparece un fondo negro
         textSurf.set_colorkey(BLACK) # Black colors will not be blit.
 
         if centeredxy:
@@ -451,6 +471,241 @@ class Game(object):
             textRect.y = y
         self.screen.blit(textSurf, textRect)
 
+    def getColor(self, coord):
+        # devuelve el color del mapa de la coordenada (x,y)
+        return self.screenmap.get_at( coord )
+
+    def changingRoomTo(self, coord):
+        color = self.getColor(coord)
+        G = getGreenColor(color)
+        # G = 200 + room_number * 10 + descarte (tomo la decena)
+        if (G == 0) or (G < 200): 
+            return 0 # no cambia de room
+        room = (G - 200) // 10
+        return room
+
+    def isPositionAllowed(self, color):
+        B = getBlueColor(color)
+        if B == 0: # B=0 es una posicion prohibida, no debiera llegar aca!
+            return False
+        if self.isPositionBlocked(color):
+            return False # blocking object active, cant pass throught!
+        return True
+
+    def isAllowedOrExit(self, coord):
+        allowed = self.isPositionAllowed(self.getColor( coord ))
+        if not allowed:
+            room = self.changingRoomTo(coord)
+            if room > 0:
+                allowed = True
+        return allowed
+
+    def isPositionBlocked(self, color):
+        # La posicion puede estar bloqueada (color verde del mapa)
+        G = getGreenColor(color)
+        if (G > 100) and (G < 200): 
+            blockid = (G - 100) // 10 # decena del color verde
+            log('DEBUG','block id: ',blockid)
+            if self.rooms[self.currentRoom]['blockages'][str(blockid)]['active'] == True:
+                return True
+        return False
+
+    def getExitPoint(self, roomnumber): # asumo que tiene, y devuelvo coord
+        return self.rooms[self.currentRoom]['exitpoints'][str(roomnumber)]
+    
+    def findWaypoints(self, xyFrom, xyTo):
+        # custom Pathfinding
+        wp = []
+        wp.append(xyFrom) # el primer waypoint siempre es el origen
+
+        room = 0
+        allowed = self.isAllowedOrExit(xyTo)
+        if allowed:
+            room = self.changingRoomTo(xyTo)
+        blocked, blockage, block = self.findBlockPoint(xyFrom, xyTo)
+        has_helperwp = 'waypoints' in self.rooms[self.currentRoom]
+        
+        log('DEBUG','allowed:'+str(allowed),'blocked:'+str(blocked),'room:'+str(room),'blockage:'+str(blockage))
+        
+        if allowed:
+            if (room > 0):
+                exitpoint = self.getExitPoint(room)
+                if blocked:
+                    if has_helperwp: # Si el room tiene waypoints
+                        print('USO WAYPOINTs y EXIT')
+                        wp = self.addHelperWaypoints(wp, xyFrom, xyTo)
+                        wp.append(exitpoint) 
+                    else:
+                        print('HASTA BLOCK')
+                        wp.append(block)
+                else:
+                    print('EXIT directo')
+                    wp.append(exitpoint)
+            else:
+                if blocked:
+                    if blockage: # blockage
+                        print('HASTA BLOCKAGE')
+                        wp.append(block)
+                    else:
+                        if has_helperwp: # Si el room tiene waypoints
+                            print('USO WAYPOINTs')
+                            wp = self.addHelperWaypoints(wp, xyFrom, xyTo)
+                            wp.append(xyTo)
+                        else:
+                            print('HASTA BLOCKAGE')
+                            wp.append(block)
+                else:
+                    print('NORMAL')
+                    wp.append(xyTo)
+        else:
+            print('HASTA BLOCK')
+            wp.append(block)
+            
+        if True: # quitar para no mostrar waypoints
+            for i in range(1, len(wp)):
+                log('DEBUG','waypoint '+str(i), 'from ',wp[i-1],'to ',wp[i])            
+                if log_level != 'NONE':
+                    pygame.draw.line(self.screen, (int(random.uniform(1,254)), 30+(i-1)*40, 40+i*40), wp[i-1], wp[i], 2)
+                    pygame.display.update()
+                    sleep(1)
+        return wp
+    
+    def addHelperWaypoints(self, current_wps, xyFrom, xyTo):
+        # De la lista de waypoints del room, agrego los necesarios para
+        #  llegar de xyFrom a xyTo        
+        helperwp = self.rooms[self.currentRoom]['waypoints']
+        cant = len(helperwp)
+        if cant == 1:
+            current_wps.append(helperwp[0])
+            return current_wps
+        else:
+            # De la lista de waypoints del room, ir ordenandolos por cercania al Destino;
+            ordwp = orderedCoordsTo(helperwp, xyTo)
+            # luego ver si esta bloqueado el camino desde Origen hasta cada wp.
+            # - Mientras este bloqueado, agregarlo al final de la lista de wp actuales, y seguir.
+            # - Si no esta bloqueado, agregarlo al final, y salir.        
+            for i in range(cant):
+                blocked, blockage, block = self.findBlockPoint(xyFrom, ordwp[i])
+                if blocked or blockage:
+                    #current_wps.append(ordwp[i])
+                    current_wps.insert(1, ordwp[i]) # por simplicidad siempre inserto en el segundo lugar
+            current_wps.insert(1,ordwp[cant-1])
+            return current_wps
+
+    def findWaypointsXXX(self, xyFrom, xyTo):
+        # custom Pathfinding
+        wp = []
+        wp.append(xyFrom) # el primer waypoint siempre es el origen
+        
+        #dest_allowed = self.isPositionAllowed(self.getColor( xyTo )) # veo si el destino final esta permitido
+        dest_allowed = self.isAllowedOrExit( xyTo ) # veo si el destino final esta permitido
+        if dest_allowed:            
+            # buscar bloqueos
+            wp = self.addHelperWaypointsIfBlocked(wp, xyFrom, xyTo)            
+            wp.append(xyTo) # el ultimo waypoint siempre es el destino
+        else:
+            # intento moverme horizontal o verticalmente
+            tryTo = (xyTo[0], xyFrom[1])
+            dest_allowed = self.isAllowedOrExit( xyTo )
+            log('DEBUG','intento 1',tryTo,dest_allowed)
+            if dest_allowed:
+                wp.append(tryTo)
+            else:
+                tryTo = (xyFrom[0], xyTo[1])
+                dest_allowed = self.isAllowedOrExit( xyTo )
+                log('DEBUG','intento 2',tryTo,dest_allowed)
+                if dest_allowed:
+                    wp.append(tryTo)
+                else:
+                    log('DEBUG','No se encontro waypoint, por ahora solo voy al helper')
+                    wp = self.addHelperWaypointsIfBlocked(wp, xyFrom, xyTo)
+                    # intento moverme, de nuevo, horizontal o verticalmente
+                    tryTo = (xyTo[0], wp[len(wp)-1][1])                    
+                    dest_allowed = self.isAllowedOrExit( xyTo )
+                    log('DEBUG','intento 3',tryTo,dest_allowed)
+                    if dest_allowed:
+                        wp.append(tryTo)
+                    else:
+                        tryTo = (wp[len(wp)-1][0], xyTo[1])
+                        dest_allowed = self.isAllowedOrExit( xyTo )
+                        log('DEBUG','intento 4',tryTo,dest_allowed)
+                        if dest_allowed:
+                            wp.append(tryTo)
+                        else:
+                            log('DEBUG','NO, no se encontro waypoint')
+
+        if True: # quitar para no mostrar waypoints
+            for i in range(1, len(wp)):
+                log('DEBUG','waypoint '+str(i), 'from ',wp[i-1],'to ',wp[i])            
+                if log_level != 'NONE':
+                    pygame.draw.line(self.screen, (int(random.uniform(1,254)), 30+(i-1)*40, 40+i*60), wp[i-1], wp[i], 2)
+                    pygame.display.update()
+                    sleep(1)
+        return wp
+
+    def addHelperWaypointsIfBlocked(self, wp, xyFrom, xyTo):
+        blocked, blockage, block = self.findBlockPoint(xyFrom, xyTo)        
+        if blocked:
+            log('DEBUG','BLOCKED!')
+            # ante un bloqueo, utilizo helper waypoints (distintos por cada room)
+            if 'waypoints' in self.rooms[self.currentRoom]:
+                log('DEBUG','Looking for helper waypoints')
+                waypoints = self.rooms[self.currentRoom]['waypoints']
+                log('DEBUG','there are ',len(waypoints),'helpers')
+                for i in range(len(waypoints)):
+                    log('DEBUG','helper #',i,waypoints[i])
+                    if i == 0: # aca ver cual conviene
+                        wp.append(waypoints[i])
+                        log('DEBUG','Helper waypoint',waypoints[i])
+            else: # TODO
+                wp.append(block) # agrego waypoints
+    
+        return wp
+    
+    def findBlockPoint(self, xyFrom, xyTo):
+        #dx = xyTo[0] - xyFrom[0] # delta X
+        #dy = xyTo[1] - xyFrom[1] # delta Y
+        dxy = deltaXY(xyFrom, xyTo)
+        step = 5 # OJO repetido del player!
+        stepxy = relStepXY(step, dxy)
+        stepx = stepxy[0]
+        stepy = stepxy[1]
+        # valor inicial
+        blockx = xyFrom[0]
+        blocky = xyFrom[1]
+        allowed = True
+        blockage = False
+        dist = abs(stepx) + abs(stepy) + 10 # solo para que entre al loop
+        pos = (int(blockx), int(blocky))
+        #log('DEBUG','findBlockPoint',xyFrom, xyTo, rel, dx, dy, stepx, stepy)
+        while (dist > abs(stepy)) and (dist > abs(stepx)) and (allowed == True):
+            blockx += stepx
+            blocky += stepy
+            pos = (int(blockx), int(blocky))
+            if log_level != 'NONE':
+                pygame.draw.circle(self.screen, (200,0,0), pos, 3, 0)
+            # veo si bloquea este punto
+            color = self.getColor( pos )
+            allowed = self.isPositionAllowed(color)
+            if allowed:
+                blockage = self.isPositionBlocked(color) # blocked by active blockages
+                allowed = not blockage
+            else:
+                log('DEBUG','Cambio a NOT ALLOWED',pos,color)
+                
+            dist = abs(blockx - xyTo[0])
+            log('DEBUG','findBlockPoint',pos,allowed,dist)
+            
+        if log_level != 'NONE':
+            pygame.display.update()
+        blocked = not allowed
+        # Devuelve:
+        #  blocked (bool): Si se encuentra el camino bloqueado
+        #  blockage (bool): Si el bloqueo es por un blockage (que podria desactivarse)
+        #  pos (tupla): posicion de choque
+        return blocked, blockage, pos        
+
+    
     def globalMessage(self,texto):
         #self.global_text = filter_nonprintable(texto)
         self.global_text = texto
@@ -525,7 +780,8 @@ class Game(object):
                 itemstr = words[1]
                 self.comandoGetItem(itemstr)
         elif (words[0] in ('go','ir')) and (len(words)>1):
-            self.comandoGoRoom(words[1])
+            #self.comandoGoRoom(words[1])
+            self.globalMessage(rndStrMemory(['Deprecated command, just walk','Walking works just fine','Go, go, go!','Games evolve','By "go" you mean the ancient board game?']))
         elif (words[0] == 'use') and (len(words)>3) and (words[2] == 'with'):
             self.comandoUse(words[1], words[3])
         else:
@@ -697,6 +953,7 @@ class Game(object):
 
     def goToRoom(self,newroom):
         self.keys_allowed = False
+        self.player.stopWalking()
         # Cargar fondo en memoria y redimensionarlo para que ocupe la ventana
         backimage = self.rooms[newroom]['background']
         self.background = pygame.image.load(normalizePath(backimage))
@@ -889,9 +1146,14 @@ class Game(object):
                    '2' : 'ForestBif'
                   },
                 'from' : {
-                    '' : [80, 1000, Dir.E],
-                    'ForestBif' : [80, 1000, Dir.E],
-                    'Beach' : [1845, 1040, Dir.W]
+                    '' : [110, 1000, Dir.E],
+                    'ForestBif' : [110, 1000, Dir.E],
+                    'Beach' : [1825, 1040, Dir.W]
+                    },
+                'waypoints' : [(623, 474)],
+                'exitpoints' : {
+                    '1' : (848,489),
+                    '2' : (5,479)
                     },
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
@@ -947,6 +1209,10 @@ class Game(object):
                     'Forest' : [75, 970, Dir.E],
                     'Deck' : [550, 1020, Dir.W]
                     },
+                'exitpoints' : {
+                    '1' : (1,467),
+                    '2' : (153,508)
+                    },
                 'music' : 'sounds/seawaves.ogg',
                 'items' : {
                    'sand' : {
@@ -973,6 +1239,11 @@ class Game(object):
                 'from' : {
                     'ForestBif' : [780, 723, Dir.S],
                     'Mill' : [705, 1020, Dir.N]
+                    },
+                'waypoints' : [(242, 437),(376, 378),(337, 349)],
+                'exitpoints' : {
+                    '1' : (357,323),
+                    '2' : (291,505)
                     },
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
@@ -1003,6 +1274,12 @@ class Game(object):
                     'Waterfall' : [393, 495, Dir.E],
                     'Forest' : [1296, 747, Dir.W],
                     'ForestZZ' : [740, 1000, Dir.N]
+                    },
+                'waypoints' : [(397, 402)],
+                'exitpoints' : {
+                    '1' : (110,193),
+                    '2' : (643,325),
+                    '3' : (321,500)
                     },
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
@@ -1045,6 +1322,10 @@ class Game(object):
                     'ForestZZ' : [80, 950, Dir.E],
                     'Deck' : [1815, 995, Dir.W]
                     },
+                'exitpoints' : {
+                    '1' : (5,455),
+                    '2' : (848,474)
+                    },
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
                    'sign' : {
@@ -1086,6 +1367,11 @@ class Game(object):
                 'from' : {
                     'Beach' : [1434, 667, Dir.S],
                     'Mill' : [1065, 1017, Dir.N]
+                    },
+                'waypoints' : [(565, 447)],
+                'exitpoints' : {
+                    '1' : (639,284),
+                    '2' : (430,504)
                     },
                 'music' : 'sounds/seawaves.ogg',
                 'items' : {
@@ -1133,6 +1419,10 @@ class Game(object):
                 'from' : {
                     'End' : [730, 542, Dir.E],
                     'ForestBif' : [1162, 542, Dir.W]
+                    },
+                'exitpoints' : {
+                    '1' : (541,250),
+                    '2' : (309,250)
                     },
                 'music' : 'sounds/waterfall.ogg',
                 'items' : {
@@ -1279,7 +1569,32 @@ class Game(object):
                         self.show_inventory = True
                         self.dirtyscreen = True
                         events.remove(event) # no imprimo este caracter
-                
+                #elif event.type == pygame.MOUSEMOTION:
+                    # Left mouse button:       1
+                    # Mouse wheel button:      2
+                    # Right mouse button:      3
+                    # Mouse wheel scroll up:   4
+                    # Mouse wheel scroll down: 5
+                    # 'rel' is a tuple (x, y). rel[0] is the x-value. rel[1] is the y-value.
+                    #log('DEBUG','Mouse move:','dx='+str(event.rel[0]),'dy='+str(event.rel[1]),'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                    #if event.rel[0] > 0: # 'rel' is a tuple (x, y). 'rel[0]' is the x-value.
+                    #    log('DEBUG',"You're moving the mouse to the right")
+                    #elif event.rel[1] > 0: # pygame start y=0 at the top of the display, so higher yvalues are further down.
+                    #    log('DEBUG',"You're moving the mouse down")
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        log('DEBUG',"Left mouse button DOWN",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                    elif event.button == 3:
+                        log('DEBUG',"Right mouse button DOWN",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        log('INFO',"Left mouse button UP",'x='+str(event.pos[0]),'y='+str(event.pos[1]),'color='+str(self.getColor((event.pos[0],event.pos[1]))))
+                        posfrom = self.player.getFootXY()
+                        waypoints = self.findWaypoints(posfrom,(event.pos[0],event.pos[1]))
+                        self.player.walkTo(waypoints)
+                    elif event.button == 3:
+                        log('DEBUG',"Right mouse button UP",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+
             # Feed textInput with events every frame
             texto1 = self.textinput.get_text()
             if self.textinput.update(events): # capturar texto con ENTER
@@ -1394,6 +1709,14 @@ def normalizePath(input_path):
     path_ok = os.path.join(path, file) # Independiente del S.O.
     return path_ok
 
+def getGreenColor(color):
+    G = color[1]
+    return G
+
+def getBlueColor(color):
+    B = color[2]
+    return B
+    
 def Ceil(number): # reemplazo de math.ceil()
     #return int(-1 * number // 1 * -1)
     res = int(number)
@@ -1403,6 +1726,97 @@ def CeilDivision(number1, number2):
     # OJO: math.ceil() Returns an int value in Python 3+, while it returns a float in Python 2.
     # -(-3//2) da 2
     return -(-number1 // number2)
+
+def sign(number):
+    if number < 0:
+        return -1
+    else:
+        return 1
+
+def relStepXY(step, dxy):
+    # En funcion de las coordenadas delta XY, calculo cuanto del step le corresponde
+    # al eje X y cuanto al eje Y usando trigonometria y proporcionalidad en triangulos
+    dx = dxy[0]
+    dy = dxy[1]
+    signx = sign(dx)
+    signy = sign(dy)
+    if dx == 0: # prevenir division por cero
+        rel = dy # ¿esta bien esto?
+    else:
+        rel = dy / dx
+    rel2 = rel**2 # rel al cuadrado
+    step2 = step**2
+    aux = 1 / (rel2 + 1)
+    stepx = signx * step * math.sqrt(aux)
+    stepy = signy * step * math.sqrt(1 - aux)
+    stepXY = (stepx, stepy)
+    return stepXY
+
+def deltaXY(xyFrom, xyTo):
+    dx = xyTo[0] - xyFrom[0] # delta X
+    dy = xyTo[1] - xyFrom[1] # delta Y
+    return (dx, dy)
+
+def lengthXY(xyFrom, xyTo):
+    dxy = deltaXY(xyFrom, xyTo)
+    dist = math.sqrt(dxy[0]**2 + dxy[1]**2)
+    return dist
+
+def closestTo(coordlist, xyTo):
+    # devuelvo, de la lista, la coordenada mas cercana a xyTo
+    cant = len(coordlist)
+    if cant == 1:
+        return coordlist[0]
+    else:
+        closest = 0
+        min_dist = 999999
+        for i in range(cant):
+            coord = coordlist[i]
+            dist = lengthXY(coord, xyTo)
+            if dist < min_dist:
+                min_dist = dist
+                closest = i
+        return coordlist[closest]
+
+def orderedCoordsTo(coordlist, xyTo):
+    # devuelvo la lista de coordenadas segun cercania a xyTo
+    cant = len(coordlist)
+    if cant == 1:
+        return coordlist
+    else:
+        dists = []
+        ordered_coordlist = []
+        # calcular distancias desde cada coordenada hasta xyTo, e incluirlas en un vector
+        for i in range(cant):
+            coord = coordlist[i]
+            dist = lengthXY(coord, xyTo)
+            tupla = (i,dist)
+            dists.append(tupla)
+        # ordenar la lista de distancias
+        ordered_dists = bubbleTupleSort(dists)
+        # reordenar la lista de coordenadas segun sus distancias
+        for i in range(cant):
+            ordered_coordlist.append( coordlist[ordered_dists[i][0]] )
+        return ordered_coordlist
+
+def bubbleTupleSort( tuples ):
+    # BubbbleSort de tuplas, donde el primer valor es el indice, y el segundo
+    # es el "peso" (en este caso la distancia). Debo comparar con tuples[x][1]
+    n = len( tuples )
+    log('DEBUG','bubblesort tuples IN:',tuples)
+    for i in range( n - 1 ) :
+        flag = 0
+        for j in range(n - 1) :
+            log('DEBUG','tupla '+str(j),tuples[j])
+            if tuples[j][1] > tuples[j + 1][1] : # comparo por "peso"
+                tmp = tuples[j]
+                tuples[j] = tuples[j + 1]
+                tuples[j + 1] = tmp
+                flag = 1
+        if flag == 0:
+            break
+    log('DEBUG','bubblesort tuples OUT:',tuples)
+    return tuples
 
 # EJ: print (rndStrMemory(['uno','dos','tres','cuatro']))
 def randomString(stringList):
@@ -1453,7 +1867,7 @@ def main():  # type: () -> None
     global screenrel
     global memoryList
 
-    log_level = 'NONE' # NONE , INFO , DEBUG
+    log_level = 'DEBUG' # NONE , INFO , DEBUG
     screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
     memoryList = {}
 
