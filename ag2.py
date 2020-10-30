@@ -49,7 +49,7 @@ class Player(pygame.sprite.Sprite):
         
         self.index = 0
         self.scale = 1
-        #self.move_step = 5 # fijo
+        self.move_step_max = 5 # tope fijo del step que luego varia por dt
         self.move_step = 76 # variable mediante DeltaTime, segun clock tick
         self.framedt = 0.0 # para controlar cuando cambiar (cycle) de frame
         self.cyclespersec = 12 # cycles a cambiar por segundo
@@ -202,6 +202,8 @@ class Player(pygame.sprite.Sprite):
     def update(self, keys, dt):
         has_moved = False
         step = int(self.move_step * dt)
+        if step > self.move_step_max:
+            step = self.move_step_max
         if 1 in keys: # si hay alguna tecla presionada
             new_x = self.xfoot
             new_y = self.yfoot
@@ -267,6 +269,7 @@ class Player(pygame.sprite.Sprite):
             #log('DEBUG','dist',dist)
             has_moved = True
             if dist < step: # llego a un waypoint
+                log('DEBUG','llego a wp:',(new_x,new_y),'dist:'+str(dist),'step:'+str(step))
                 if len(self.waypoints) > 0:
                     self.stepxy = (0,0)
                 else:
@@ -990,11 +993,11 @@ class Game(object):
         self.keys_allowed = True
         
     def relativeW(self,x):
-        log('DEBUG','relativeW: ', x, self.bckwrel, int(x / self.bckwrel))
+        #log('DEBUG','relativeW: ', x, self.bckwrel, int(x / self.bckwrel))
         return int(x / self.bckwrel)
         
     def relativeH(self,y):
-        log('DEBUG','relativeH: ', y, self.bckhrel, int(y / self.bckhrel))
+        #log('DEBUG','relativeH: ', y, self.bckhrel, int(y / self.bckhrel))
         return int(y / self.bckhrel)
 
     def drawRect(self,x,y,w,h,color):
@@ -1093,7 +1096,7 @@ class Game(object):
                 layerimage = layers[layer]['layerimage']
                 # determino si el player se superpone con este layer
                 if self.player.isEclipsedByLayer(z, xfrom, xto):
-                    log('DEBUG',layer,z,xfrom,xto,layerimage)
+                    #log('DEBUG','layer:'+layer,z,xfrom,xto,layerimage)
                     imlayer = loadImage(layerimage, self.width, self.height) # devuelve Surface
                     self.screen.blit(imlayer, (0, 0))
 
