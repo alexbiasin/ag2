@@ -535,33 +535,33 @@ class Game(object):
                 exitpoint = self.getExitPoint(room)
                 if blocked:
                     if has_helperwp: # Si el room tiene waypoints
-                        print('USO WAYPOINTs y EXIT')
+                        log('DEBUG','USO WAYPOINTs y EXIT')
                         wp = self.addHelperWaypoints(wp, xyFrom, xyTo)
                         wp.append(exitpoint) 
                     else:
-                        print('HASTA BLOCK')
+                        log('DEBUG','HASTA BLOCK')
                         wp.append(block)
                 else:
-                    print('EXIT directo')
+                    log('DEBUG','EXIT directo')
                     wp.append(exitpoint)
             else:
                 if blocked:
                     if blockage: # blockage
-                        print('HASTA BLOCKAGE')
+                        log('DEBUG','HASTA BLOCKAGE')
                         wp.append(block)
                     else:
                         if has_helperwp: # Si el room tiene waypoints
-                            print('USO WAYPOINTs')
+                            log('DEBUG','USO WAYPOINTs')
                             wp = self.addHelperWaypoints(wp, xyFrom, xyTo)
                             wp.append(xyTo)
                         else:
-                            print('HASTA BLOCKAGE')
+                            log('DEBUG','HASTA BLOCKAGE')
                             wp.append(block)
                 else:
-                    print('NORMAL')
+                    log('DEBUG','NORMAL')
                     wp.append(xyTo)
         else:
-            print('HASTA BLOCK')
+            log('DEBUG','HASTA BLOCK')
             wp.append(block)
             
         if True: # quitar para no mostrar waypoints
@@ -1243,7 +1243,7 @@ class Game(object):
                     'ForestBif' : [780, 723, Dir.S],
                     'Mill' : [705, 1020, Dir.N]
                     },
-                'waypoints' : [(242, 437),(376, 378),(337, 349)],
+                'waypoints' : [(242, 437),(313,403),(376, 378),(337, 349)],
                 'exitpoints' : {
                     '1' : (357,323),
                     '2' : (291,505)
@@ -1870,7 +1870,7 @@ def main():  # type: () -> None
     global screenrel
     global memoryList
 
-    log_level = 'DEBUG' # NONE , INFO , DEBUG
+    log_level = 'NONE' # NONE , INFO , DEBUG
     screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
     memoryList = {}
 
