@@ -21,6 +21,7 @@ import json # para guardar y cargar estado
 import bz2
 import pickle # grabar objetos en archivos
 import _pickle as cPickle
+import gettext
 
 # Opening JSON file 
 #import json 
@@ -431,7 +432,7 @@ class Game(object):
 
     def doQuit(self):
         # Desactivar sonido y video, y salir
-        self.globalMessage(rndStrMemory(['Bye bye!','We\'ll miss you...','Don\'t be frustrated. You\'ll make it next time.','Is it bedtime already?']))
+        self.globalMessage(rndStrMemory([_('Bye bye!'),_('We\'ll miss you...'),_('Don\'t be frustrated. You\'ll make it next time.'),_('Is it bedtime already?')]))
         self.draw_screen()
         sleep(1)
         if self.has_audio:
@@ -792,7 +793,7 @@ class Game(object):
 
     def showHelp(self):
     #2345678901234567890123456789012345678901234567890123456789012345678901234567890
-        helpmessage = """               -< Command Help >-                                        
+        helpmessage = _("""               -< Command Help >-                                        
         look : describes what's around you.                                             
         look [item] : describes an item in your inventory or in the room.               
         get [item] : takes an object of the room and keeps it in your inventory.        
@@ -801,7 +802,7 @@ class Game(object):
         load : restores the game that you had saved before.                         
         F3 : repeats last command.                                                      
         TAB : shows your inventory.                                                     
-        """
+        """)
         self.globalMessage(helpmessage)
         
     def comandoGoRoom(self,direction):
@@ -1564,6 +1565,16 @@ class Game(object):
                         if (largo > 0):
                             self.textinput.input_string = self.previoustext # repetir el ultimo comando
                             self.textinput.cursor_position = largo
+                    if (event.key == pygame.K_F11):
+                        langES.install()
+                        _ = langES.gettext
+                        self.globalMessage('Idioma español seleccionado')
+                    if (event.key == pygame.K_F12):
+                        langEN.install()
+                        _ = langEN.gettext
+                        self.globalMessage('English language selected')
+                        
+
                 if (event.type == pygame.KEYDOWN):
                     if (event.key == pygame.K_ESCAPE):
                         events.remove(event) # no imprimo este caracter
@@ -1869,10 +1880,19 @@ def main():  # type: () -> None
     global log_level
     global screenrel
     global memoryList
+    global langEN
+    global langES
 
     log_level = 'NONE' # NONE , INFO , DEBUG
     screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
     memoryList = {}
+    
+    # i18n
+    CURR_DIR = os.getcwd()
+    langEN = gettext.translation(domain='en', languages=['en'], localedir=CURR_DIR)
+    langES = gettext.translation(domain='es', languages=['es'], localedir=CURR_DIR)
+    langES.install()
+    _ = langES.gettext
 
     successes, failures = pygame.init() # starts with a hidden window
     # Inicializar PyGame y pantalla
