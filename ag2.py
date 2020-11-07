@@ -595,76 +595,6 @@ class Game(object):
                     current_wps.insert(1, ordwp[i]) # por simplicidad siempre inserto en el segundo lugar
             current_wps.insert(1,ordwp[cant-1])
             return current_wps
-
-    def findWaypointsXXX(self, xyFrom, xyTo):
-        # custom Pathfinding
-        wp = []
-        wp.append(xyFrom) # el primer waypoint siempre es el origen
-        
-        #dest_allowed = self.isPositionAllowed(self.getColor( xyTo )) # veo si el destino final esta permitido
-        dest_allowed = self.isAllowedOrExit( xyTo ) # veo si el destino final esta permitido
-        if dest_allowed:            
-            # buscar bloqueos
-            wp = self.addHelperWaypointsIfBlocked(wp, xyFrom, xyTo)            
-            wp.append(xyTo) # el ultimo waypoint siempre es el destino
-        else:
-            # intento moverme horizontal o verticalmente
-            tryTo = (xyTo[0], xyFrom[1])
-            dest_allowed = self.isAllowedOrExit( xyTo )
-            log('DEBUG','intento 1',tryTo,dest_allowed)
-            if dest_allowed:
-                wp.append(tryTo)
-            else:
-                tryTo = (xyFrom[0], xyTo[1])
-                dest_allowed = self.isAllowedOrExit( xyTo )
-                log('DEBUG','intento 2',tryTo,dest_allowed)
-                if dest_allowed:
-                    wp.append(tryTo)
-                else:
-                    log('DEBUG','No se encontro waypoint, por ahora solo voy al helper')
-                    wp = self.addHelperWaypointsIfBlocked(wp, xyFrom, xyTo)
-                    # intento moverme, de nuevo, horizontal o verticalmente
-                    tryTo = (xyTo[0], wp[len(wp)-1][1])                    
-                    dest_allowed = self.isAllowedOrExit( xyTo )
-                    log('DEBUG','intento 3',tryTo,dest_allowed)
-                    if dest_allowed:
-                        wp.append(tryTo)
-                    else:
-                        tryTo = (wp[len(wp)-1][0], xyTo[1])
-                        dest_allowed = self.isAllowedOrExit( xyTo )
-                        log('DEBUG','intento 4',tryTo,dest_allowed)
-                        if dest_allowed:
-                            wp.append(tryTo)
-                        else:
-                            log('DEBUG','NO, no se encontro waypoint')
-
-        if True: # quitar para no mostrar waypoints
-            for i in range(1, len(wp)):
-                log('DEBUG','waypoint '+str(i), 'from ',wp[i-1],'to ',wp[i])            
-                if log_level != 'NONE':
-                    pygame.draw.line(self.screen, (int(random.uniform(1,254)), 30+(i-1)*40, 40+i*60), wp[i-1], wp[i], 2)
-                    pygame.display.update()
-                    sleep(1)
-        return wp
-
-    def addHelperWaypointsIfBlocked(self, wp, xyFrom, xyTo):
-        blocked, blockage, block = self.findBlockPoint(xyFrom, xyTo)        
-        if blocked:
-            log('DEBUG','BLOCKED!')
-            # ante un bloqueo, utilizo helper waypoints (distintos por cada room)
-            if 'waypoints' in self.rooms[self.currentRoom]:
-                log('DEBUG','Looking for helper waypoints')
-                waypoints = self.rooms[self.currentRoom]['waypoints']
-                log('DEBUG','there are ',len(waypoints),'helpers')
-                for i in range(len(waypoints)):
-                    log('DEBUG','helper #',i,waypoints[i])
-                    if i == 0: # aca ver cual conviene
-                        wp.append(waypoints[i])
-                        log('DEBUG','Helper waypoint',waypoints[i])
-            else: # TODO
-                wp.append(block) # agrego waypoints
-    
-        return wp
     
     def findBlockPoint(self, xyFrom, xyTo):
         #dx = xyTo[0] - xyFrom[0] # delta X
@@ -755,41 +685,41 @@ class Game(object):
             self.doQuit()
         if words[0] in ('help','ayuda','?'):
             self.showHelp()
-        elif words[0] == 'save':
+        elif words[0] in ('save','guardar','grabar'):
             self.saveGame()
-            self.globalMessage('Game saved')
-        elif words[0] == 'load':
+            self.globalMessage(_('Game saved'))
+        elif words[0] in ('load','cargar'):
             if self.loadGame():
-                self.globalMessage('Game loaded')
+                self.globalMessage(_('Game loaded'))
             else:
-                self.globalMessage('You have not saved any game before')
+                self.globalMessage(_('You have not saved any game before'))
         #some fun
-        elif words[0] == 'jump':
-            self.globalMessage(rndStrMemory(['There is no jumping in this game','This is Kaos. We don\'t jump here!','Jump! Jump! Here comes the man...','You feel exhausted just by thinking of jumping','Wrong game for jumping I think']))
-        elif words[0] == 'dive':
-            self.globalMessage(rndStrMemory(['Are you nuts?','You should change your pills.','No diving in this area!','There are better moments for diving','I don\'t have my snorkel']))
-        elif words[0] == 'sit':
-            self.globalMessage(rndStrMemory(['There is no time to be wasting','Walking is good for your health.','Nah, I don\'t wan\'t to sit, thanks.','Sit? Am I a dog?','Is that what will let you out of this forest?']))
-        elif words[0] == 'sleep':
-            self.globalMessage(rndStrMemory(['Come on you lazy cow!','There is no time for a nap','No! Wake up!','Definitely not!','Let me think... no!','Bored already?']))
-        elif words[0] in ('talk','scream','shout'):
-            self.globalMessage(rndStrMemory(['Shhh!','No one can hear you','There is no one around','There is no use in talking, screaming or shouting']))
+        elif words[0] in ('jump','saltar'):
+            self.globalMessage(rndStrMemory([_('There is no jumping in this game'),_('This is Kaos. We don\'t jump here!'),_('Jump! Jump! Here comes the man...'),_('You feel exhausted just by thinking of jumping'),_('Wrong game for jumping I think')]))
+        elif words[0] in ('dive','nadar','sumergirse','sambullirse'):
+            self.globalMessage(rndStrMemory([_('Are you nuts?'),_('You should change your pills.'),_('No diving in this area!'),_('There are better moments for diving'),_('I don\'t have my snorkel')]))
+        elif words[0] in ('sit','sentarse'):
+            self.globalMessage(rndStrMemory([_('There is no time to be wasting'),_('Walking is good for your health.'),_('Nah, I don\'t wan\'t to sit, thanks.'),_('Sit? Am I a dog?'),_('Is that what will let you out of this forest?')]))
+        elif words[0] in ('sleep','dormir'):
+            self.globalMessage(rndStrMemory([_('Come on you lazy cow!'),_('There is no time for a nap'),_('No! Wake up!'),_('Definitely not!'),_('Let me think... no!'),_('Bored already?')]))
+        elif words[0] in ('talk','scream','shout','hablar','gritar'):
+            self.globalMessage(rndStrMemory([_('Shhh!'),_('No one can hear you'),_('There is no one around'),_('There is no use in talking, screaming or shouting')]))
         elif words[0] in ('look','mirar','ver'):
             if len(words) == 1:
                 self.comandoLookRoom()
             else:
                 self.comandoLookItem(words[1])
-        elif words[0] in ('get','take','grab','agarrar'):
+        elif words[0] in ('get','take','grab','agarrar','tomar'):
             if len(words) > 1:
                 itemstr = words[1]
                 self.comandoGetItem(itemstr)
         elif (words[0] in ('go','ir')) and (len(words)>1):
             #self.comandoGoRoom(words[1])
-            self.globalMessage(rndStrMemory(['Deprecated command, just walk','Walking works just fine','Go, go, go!','Games evolve','By "go" you mean the ancient board game?']))
-        elif (words[0] == 'use') and (len(words)>3) and (words[2] == 'with'):
+            self.globalMessage(rndStrMemory([_('Deprecated command, just walk'),_('Walking works just fine'),_('Go, go, go!'),_('Games evolve'),_('By "go" you mean the ancient board game?')]))
+        elif (words[0] in ('use','usar')) and (len(words)>3) and (words[2] in ('with','con')):
             self.comandoUse(words[1], words[3])
         else:
-            self.globalMessage(rndStrMemory(['Incorrect command','Not sure what you mean','Try something else','Hit F1 key for help on commands','That does not compute']))
+            self.globalMessage(rndStrMemory([_('Incorrect command'),_('Not sure what you mean'),_('Try something else'),_('Hit F1 key for help on commands'),_('That does not compute')]))
 
     def showHelp(self):
     #2345678901234567890123456789012345678901234567890123456789012345678901234567890
@@ -811,14 +741,14 @@ class Game(object):
             #set the current room to the new room
             goToRoom( rooms[currentRoom]['directions'][direction] )
         else: # there is no door (link) to the new room
-            self.globalMessage(rndStrMemory(['You can\'t go that way!','Really? '+direction+'?','Consider getting a compass','I don\'t think going that way is the right way','Danger! Going that way is demential (because it doesn\'t exists)']))
+            self.globalMessage(rndStrMemory([_('You can\'t go that way!'),_('Really? ')+direction+'?',_('Consider getting a compass'),_('I don\'t think going that way is the right way'),_('Danger! Going that way is demential (because it doesn\'t exists)')]))
 
     def comandoLookRoom(self):
         # mostrar descripcion del room actual, y posibles salidas
-        mensaje = self.rooms[self.currentRoom]['desc']
+        mensaje = _(self.rooms[self.currentRoom]['desc'])
         # mostrar los items que hay en el room actual
         if bool(self.rooms[self.currentRoom]['items']):
-            mensaje += ' You see '
+            mensaje += _(' You see ')
             i = 0
             cantitems = len(list(self.rooms[self.currentRoom]['items']))
             for item in self.rooms[self.currentRoom]['items']:
@@ -827,8 +757,8 @@ class Game(object):
                     if i > 1:
                         mensaje += ', '
                         if cantitems == i:
-                            mensaje += 'and '
-                    mensaje += self.rooms[self.currentRoom]['items'][item]['roomdesc']
+                            mensaje += _('and ')
+                    mensaje += _(self.rooms[self.currentRoom]['items'][item]['roomdesc'])
                 else:
                     i -= 1
                     cantitems -= 1
@@ -854,53 +784,87 @@ class Game(object):
         
         self.globalMessage(mensaje)
 
+    def findItemInDict(self, itemstr, itemdict):
+        # Recibe un Dict con 'items' (puede ser room['items'], ghostitems o inventory), y
+        #  un item a buscar (en cualquier idioma).
+        # Devuelve el nombre del item si lo encuentra, o "" si no existe.
+        if (itemstr in itemdict.keys()):
+            log('DEBUG','find directo de '+itemstr)
+            return itemstr
+        else:
+            log('DEBUG','busco '+itemstr+' en dict')
+            for item in itemdict:
+                words = itemdict[item]['descwords']
+                log('DEBUG', itemstr, item, words)
+                if itemstr in words:
+                    return item
+        return ""
+        
+    def findItemInInventory(self, itemstr):
+        return self.findItemInDict(itemstr, self.inventory)
+    
+    def findItemInRoom(self, itemstr):
+        return self.findItemInDict(itemstr, self.rooms[self.currentRoom]['items'])
+
+    def findItemInGhostitems(self, itemstr):
+        return self.findItemInDict(itemstr, self.ghostitems)
+
     def comandoLookItem(self,itemstr):
         # el item a mirar puede estar en el inventario o en el room actual
-        if (itemstr in self.inventory.keys()): # si el item lo tengo yo
-            mensaje = self.inventory[itemstr]['desc']
+        item = self.findItemInInventory(itemstr)
+        #if (_(itemstr) in self.inventory.keys()): # si el item lo tengo yo
+        if (item): # si el item lo tengo yo
+            mensaje = _(self.inventory[item]['desc'])
         else:
-            if (itemstr in self.rooms[self.currentRoom]['items'].keys()): # si el item esta en el room
-                if (self.rooms[self.currentRoom]['items'][itemstr]['takeable'] == True):
-                    mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['roomdesc']
+            item = self.findItemInRoom(itemstr)
+            #if (itemstr in self.rooms[self.currentRoom]['items'].keys()): # si el item esta en el room
+            if (item): # si el item esta en el room
+                if (self.rooms[self.currentRoom]['items'][item]['takeable'] == True):
+                    mensaje = _('You see ') + _(self.rooms[self.currentRoom]['items'][item]['roomdesc'])
                 else:
-                    if self.rooms[self.currentRoom]['items'][itemstr]['visible'] == True:
-                        if ('locked' in self.rooms[self.currentRoom]['items'][itemstr]) and (self.rooms[self.currentRoom]['items'][itemstr]['locked'] == False) and (self.rooms[self.currentRoom]['items'][itemstr]['iteminside'] in self.rooms[self.currentRoom]['items'].keys()):
-                            mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['roomdescunlocked']
+                    if self.rooms[self.currentRoom]['items'][item]['visible'] == True:
+                        if ('locked' in self.rooms[self.currentRoom]['items'][item]) and (self.rooms[self.currentRoom]['items'][item]['locked'] == False) and (self.rooms[self.currentRoom]['items'][item]['iteminside'] in self.rooms[self.currentRoom]['items'].keys()):
+                            mensaje = _('You see ') + _(self.rooms[self.currentRoom]['items'][item]['roomdescunlocked'])
                         else:
-                            mensaje = 'You see ' + self.rooms[self.currentRoom]['items'][itemstr]['desc']
+                            mensaje = _('You see ') + _(self.rooms[self.currentRoom]['items'][item]['desc'])
                     else:
-                        mensaje = rndStrMemory(['I don\'t see any ' + itemstr, 'It may have dissapeared, you know.','Are you sure the '+ itemstr +' is still there?'])
+                        mensaje = rndStrMemory([_('I don\'t see any ') + _(itemstr), _('It may have dissapeared, you know.'),_('Are you sure the ') + _(itemstr) + _(' is still there?')])
             else:
                 if (itemstr in self.rooms[self.currentRoom]['directions'].keys()):
-                    mensaje = 'Yes, you can go ' + itemstr
+                    mensaje = _('Yes, you can go ') + _(itemstr)
                 else:
-                    mensaje = rndStrMemory(['The ' + itemstr + ' is not here' , 'I don\'t see any ' + itemstr])
+                    mensaje = rndStrMemory([_('The ') + _(itemstr) + _(' is not here'), _('I don\'t see any ') + _(itemstr)])
         self.globalMessage(mensaje)
 
     def comandoGetItem(self,itemstr):
-        if (itemstr in self.inventory.keys()):
-            mensaje = 'You already have the ' + itemstr
+        item = self.findItemInInventory(itemstr)
+        if (item):
+            mensaje = _('You already have the ') + _(itemstr)
         else:
-            if (itemstr in self.rooms[self.currentRoom]['items']) and (self.rooms[self.currentRoom]['items'][itemstr]['visible'] == True):
-                if (self.rooms[self.currentRoom]['items'][itemstr]['takeable']):
+            log('DEBUG',itemstr, _(itemstr), self.rooms[self.currentRoom]['items'])
+            item = self.findItemInRoom(itemstr)
+            if (item) and (self.rooms[self.currentRoom]['items'][item]['visible'] == True):
+                if (self.rooms[self.currentRoom]['items'][item]['takeable']):
                     #add the item to their inventory
-                    self.inventory[itemstr] = self.rooms[self.currentRoom]['items'][itemstr]
+                    self.inventory[item] = self.rooms[self.currentRoom]['items'][item]
                     #display a helpful message
-                    mensaje = rndStrMemory([itemstr + ' got!','Yeah! You have gotten the '+itemstr,'The '+itemstr+', just what you\'ve been looking for','At last, the glorious '+itemstr ])
+                    mensaje = rndStrMemory([_(itemstr) + _(' got!'),_('Yeah! You have gotten the ') + _(itemstr), _('The ') + _(itemstr) + _(', just what you\'ve been looking for'), _('At last, the glorious ') + _(itemstr) ])
                     #delete the item from the room
-                    del self.rooms[self.currentRoom]['items'][itemstr]
+                    del self.rooms[self.currentRoom]['items'][item]
                 else:
-                    mensaje = rndStrMemory(['You can\'t get the ' + itemstr, 'Nah! It\'s like painted to the background', 'You wish!'])
+                    mensaje = rndStrMemory([_('You can\'t get the ') + _(itemstr), _('Nah! It\'s like painted to the background'), _('You wish!')])
             else:
                 #tell them they can't get it
-                mensaje = rndStrMemory([itemstr + ' is not here', 'Nah!', 'You wish!'])
+                mensaje = rndStrMemory([_(itemstr) + _(' is not here'), _('Nah!'), _('You wish!')])
         self.globalMessage(mensaje)
         
-    def comandoUse(self,item1, item2):
+    def comandoUse(self, itemstr1, itemstr2):
         # item1 debe estar en el inventory
+        item1 = self.findItemInInventory(itemstr1)
         # item2 puede estar en el room (para accionar algo) o en el inventory (para mezclarlos)
-        if (item1 in self.inventory.keys()):
-            if (item2 in self.inventory.keys()): # mezclar 2 items del inventory
+        if (item1):
+            item2 = self.findItemInInventory(itemstr2)            
+            if (item2): # mezclar 2 items del inventory
                 if ('mixwith' in self.inventory[item1]) and ('mixwith' in self.inventory[item2])==True and (self.inventory[item1]['mixwith']['otheritem'] == item2) and (self.inventory[item2]['mixwith']['otheritem'] == item1):
                     # creo el nuevo item
                     nuevoitem = self.inventory[item2]['mixwith']['summon']
@@ -910,44 +874,45 @@ class Game(object):
                     del self.inventory[item2]
                     del self.ghostitems[nuevoitem]
                     #display a helpful message
-                    #globalMessage('summoned a ' + nuevoitem)
-                    mensaje = self.inventory[nuevoitem]['summonmessage']
+                    mensaje = _(self.inventory[nuevoitem]['summonmessage'])
                 else:
-                    mensaje = rndStrMemory(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
-            elif (item2 in self.rooms[self.currentRoom]['items']): # accionar algo que esta 'locked'
-                if ('locked' in self.rooms[self.currentRoom]['items'][item2]):
-                    if (self.rooms[self.currentRoom]['items'][item2]['locked'] == True):
-                        if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
-                            # al accionar item2 con item1, queda visible iteminside
-                            self.rooms[self.currentRoom]['items'][item2]['locked'] = False # lo destrabo y queda asi
-                            if ('iteminside' in self.rooms[self.currentRoom]['items'][item2]):
-                                iteminside = self.rooms[self.currentRoom]['items'][item2]['iteminside']
-                                self.rooms[self.currentRoom]['items'][iteminside]['visible'] = True # descubro el iteminside
-                                mensaje = self.rooms[self.currentRoom]['items'][item2]['unlockingtext']
-                            else:
-                                mensaje = 'OJO: el iteminside no esta en '+self.currentRoom # no debiera llegar aca
-                        else:
-                            mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
-                    else:
-                        mensaje = rndStrMemory(['Not again!','You\'ve already done that.','Don\'t be repetitive dude!'])
-                elif ('blocked' in self.rooms[self.currentRoom]['items'][item2]): # destrabar algo para poder pasar
-                    if (self.rooms[self.currentRoom]['items'][item2]['blocked'] == True):
-                        if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
-                            self.rooms[self.currentRoom]['items'][item2]['blocked'] = False # destrabo el bloqueo y queda asi
-                            self.rooms[self.currentRoom]['items'][item2]['visible'] = False # ya no se ve el bloqueo
-                            blockid = self.rooms[self.currentRoom]['items'][item2]['blockid'] # ID del blockage
-                            self.rooms[self.currentRoom]['blockages'][blockid]['active'] = False # libero el bloqueo para que el player pueda pasar
-                            mensaje = self.rooms[self.currentRoom]['items'][item2]['unlockingtext']
-                        else:
-                            mensaje = 'I think the '+item1+' is not meant to be used with the '+item2+'.'
-                    else:
-                        mensaje = rndStrMemory(['Are you still seeing that?','You\'ve already done that.','Don\'t be repetitive pal!'])
-                else:
-                    mensaje = rndStrMemory(['Can\'t use ' + item1 + ' with ' + item2 + '!','I don\'t think the '+item1+' is meant to be used with the '+item2,'...'+item1+' with '+item2+' does not compute.'])
+                    mensaje = rndStrMemory([_('Can\'t use ') + _(itemstr1) + _(' with ') + _(itemstr2) + '!',_('I don\'t think the ') + _(itemstr1) + _(' is meant to be used with the ') + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
             else:
-                mensaje = rndStrMemory(['There is no ' + item2 + ' around.', 'Try something else.'])
+                item2 = self.findItemInRoom(itemstr2)
+                if (item2): # accionar algo que esta 'locked' en el room
+                    if ('locked' in self.rooms[self.currentRoom]['items'][item2]):
+                        if (self.rooms[self.currentRoom]['items'][item2]['locked'] == True):
+                            if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
+                                # al accionar item2 con item1, queda visible iteminside
+                                self.rooms[self.currentRoom]['items'][item2]['locked'] = False # lo destrabo y queda asi
+                                if ('iteminside' in self.rooms[self.currentRoom]['items'][item2]):
+                                    iteminside = self.rooms[self.currentRoom]['items'][item2]['iteminside']
+                                    self.rooms[self.currentRoom]['items'][iteminside]['visible'] = True # descubro el iteminside
+                                    mensaje = _(self.rooms[self.currentRoom]['items'][item2]['unlockingtext'])
+                                else:
+                                    mensaje = 'OJO: el iteminside no esta en '+self.currentRoom # no debiera llegar aca
+                            else:
+                                mensaje = _('I think the ') + _(itemstr1) + _(' is not meant to be used with the ') + _(itemstr2) + '.'
+                        else:
+                            mensaje = rndStrMemory([_('Not again!'), _('You\'ve already done that.'), _('Don\'t be repetitive dude!')])
+                    elif ('blocked' in self.rooms[self.currentRoom]['items'][item2]): # destrabar algo para poder pasar
+                        if (self.rooms[self.currentRoom]['items'][item2]['blocked'] == True):
+                            if (item1 == self.rooms[self.currentRoom]['items'][item2]['unlockeritem']):
+                                self.rooms[self.currentRoom]['items'][item2]['blocked'] = False # destrabo el bloqueo y queda asi
+                                self.rooms[self.currentRoom]['items'][item2]['visible'] = False # ya no se ve el bloqueo
+                                blockid = self.rooms[self.currentRoom]['items'][item2]['blockid'] # ID del blockage
+                                self.rooms[self.currentRoom]['blockages'][blockid]['active'] = False # libero el bloqueo para que el player pueda pasar
+                                mensaje = _(self.rooms[self.currentRoom]['items'][item2]['unlockingtext'])
+                            else:
+                                mensaje = _('I think the ') + _(itemstr1) + _(' is not meant to be used with the ') + _(itemstr2) + '.'
+                        else:
+                            mensaje = rndStrMemory([_('Are you still seeing that?'), _('You\'ve already done that.'), _('Don\'t be repetitive pal!')])
+                    else:
+                        mensaje = rndStrMemory([_('Can\'t use ') + _(itemstr1) + _(' with ') + _(itemstr2) + '!', _('I don\'t think the ') + _(itemstr1) + _(' is meant to be used with the ') + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
+                else:
+                    mensaje = rndStrMemory([_('There is no ') + _(itemstr2) + _(' around.'), _('Try something else.')])
         else:
-            mensaje = 'You don\'t have any ' + item1
+            mensaje = _('You don\'t have any ') + _(itemstr1)
         self.globalMessage(mensaje)
 
     def loadMusic(self,musicpath):
@@ -1013,9 +978,9 @@ class Game(object):
     def drawInventory(self):
         # si no tengo nada en el inventario, mostrar mensaje
         if bool(self.inventory) == False:
-            self.globalMessage(rndStrMemory(['You are carrying nothing!', 'Nothing in your pockets so far', 'Maybe if you start using the "get" command...']))
+            self.globalMessage(rndStrMemory([_('You are carrying nothing!'), _('Nothing in your pockets so far'), _('Maybe if you start using the "get" command...')]))
         else:
-            itemsperrow = 2 # max columns
+            itemsperrow = 3 # max columns
             listaitems = list(self.inventory)
             cantitems = len(listaitems)
             rows = CeilDivision(cantitems, itemsperrow)
@@ -1048,7 +1013,8 @@ class Game(object):
                         xt = x
                         yt = y + itemh + pad
                         item = listaitems[i]
-                        self.drawText(item, self.textcolor, xt, yt)
+                        name = self.inventory[listaitems[i]]['name']
+                        self.drawText(_(name), self.textcolor, xt, yt)
                     i += 1
 
     # Mostrar fondo
@@ -1162,10 +1128,11 @@ class Game(object):
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
                    'stick' : {
+                        'name' : 'stick',
                        'image' : 'images/stick.png',
                        'roomdesc' : 'a stick',
                        'desc' : 'A heavy and strong wood stick',
-                       'descwords' : ['branch','stick'],
+                       'descwords' : ['branch','stick',_('branch'),_('stick')],
                        'visible' : True,
                        'mixwith' : {
                            'otheritem' : 'knife',
@@ -1174,9 +1141,10 @@ class Game(object):
                        'takeable' : True
                        },
                    'bushes' : {
+                        'name' : 'bushes',
                        'roomdesc' : 'some bushes',
-                       'desc' : 'a few thick bushes that may conceal something',
-                       'descwords' : ['bush','bushes'],
+                       'desc' : _('a few thick bushes that may conceal something'),
+                       'descwords' : ['bush','bushes',_('bush'),_('bushes')],
                        'locked' : True,
                        'unlockeritem' : 'bayonet',
                        'unlockingtext' : 'You have cut through the bushes and uncovered something.',
@@ -1188,10 +1156,11 @@ class Game(object):
                        'takeable' : False
                        },
                    'key' : {
+                        'name' : 'key',
                        'image' : 'images/key.png',
                        'roomdesc' : 'a key behind the bushes',
                        'desc' : 'It\'s a golden key',
-                       'descwords' : ['key'],
+                       'descwords' : ['key',_('key')],
                        'visible' : False,
                        'mixwith' : {
                            'otheritem' : 'script',
@@ -1220,8 +1189,10 @@ class Game(object):
                 'music' : 'sounds/seawaves.ogg',
                 'items' : {
                    'sand' : {
+                        'name' : 'sand',
                        'image' : 'images/sand.png',
                        'desc' : 'Just, you know, sand.',
+                       'descwords' : ['sand',_('sand')],
                        'visible' : True,
                        'roomdesc' : 'sand',
                        'mixwith' : {
@@ -1252,10 +1223,11 @@ class Game(object):
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
                    'knife' : {
+                        'name' : 'knife',
                        'image' : 'images/knife.png',
                        'roomdesc' : 'a knife beneath the tree',
                        'desc' : 'Some rusty knife',
-                       'descwords' : ['knife','blade','cutter'],
+                       'descwords' : ['knife','blade','cutter',_('knife'),_('blade'),_('cutter')],
                        'visible' : True,
                        'mixwith' : {
                            'otheritem' : 'stick',
@@ -1288,8 +1260,10 @@ class Game(object):
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
                    'feather' : {
+                        'name' : 'feather',
                        'image' : 'images/feather.png',
                        'desc' : 'A nice looking feather. I\'m sure the bird does not need it anymore.',
+                       'descwords' : ['feather',_('feather')],
                        'roomdesc' : 'a feather',
                        'visible' : True,
                        'mixwith' : {
@@ -1301,7 +1275,7 @@ class Game(object):
                   }
                 },                
             'Mill' : {
-                'desc' : 'This area of the country has a water mill and a sign.',
+                'desc' : 'This area of the country has a water mill.',
                 'background' : 'images/molino-agua.jpg',
                 'imagemap' : 'images/molino-agua_map.jpg',
                 'layers' : {
@@ -1333,15 +1307,19 @@ class Game(object):
                 'music' : 'sounds/grillos.ogg',
                 'items' : {
                    'sign' : {
+                        'name' : 'sign',
                        'image' : 'images/xxx.png',
                        'desc' : 'a sign that explains how to escape the forest by going left, take another left, go up the cliff, and down the hill, and the rest was erased by some funny guy. Maybe you can write your own path...',
+                       'descwords' : ['sign',_('sign')],
                        'roomdesc' : 'a wooden sign',
                        'visible' : True,
                        'takeable' : False
                     },
                    'ink' : {
+                        'name' : 'ink',
                        'image' : 'images/ink.png',
                        'desc' : 'A full jar of strange ink. It may seem black but when you look at it closely, it has an uncommon glow.',
+                       'descwords' : ['ink',_('ink')],
                        'roomdesc' : 'ink',
                        'visible' : True,
                        'mixwith' : {
@@ -1380,22 +1358,28 @@ class Game(object):
                 'music' : 'sounds/seawaves.ogg',
                 'items' : {
                    'deck' : {
+                        'name' : 'deck',
                        'image' : 'images/xxx.png',
                        'desc' : 'a deck that connects the beach with the forest. You can walk on it.',
+                       'descwords' : ['deck',_('deck')],
                        'roomdesc' : 'a wooden deck',
                        'visible' : True,
                        'takeable' : False
                     },
                    'bench' : {
+                        'name' : 'bench',
                        'image' : 'images/xxx.png',
                        'desc' : 'a not-so-confy wooden bench. And no, you can\'t sit there.',
+                       'descwords' : ['bench',_('bench')],
                        'roomdesc' : 'a wooden bench',
                        'visible' : True,
                        'takeable' : False
                     },
                    'paper' : {
+                        'name' : 'paper',
                        'image' : 'images/paper.png',
-                       'desc' : 'A full jar of strange ink. It may seem black but when you look at it closely, it has an uncommon glow.',
+                       'desc' : 'a blank paper ready to be used.',
+                       'descwords' : ['hoja','paper',_('paper')],
                        'roomdesc' : 'a piece of paper left on the floor',
                        'visible' : True,
                        'mixwith' : {
@@ -1431,15 +1415,19 @@ class Game(object):
                 'music' : 'sounds/waterfall.ogg',
                 'items' : {
                    'bridge' : {
+                        'name' : 'bridge',
                        'image' : 'images/xxx.png',
                        'desc' : 'a bridge that leads outside the forest.',
+                       'descwords' : ['bridge',_('bridge')],
                        'roomdesc' : 'a bridge',
                        'visible' : True,
                        'takeable' : False
                     },
                    'blockage' : {
+                        'name' : 'blockage',
                        'image' : 'images/xxx.png',
                        'desc' : 'some magical blockage over the bridge. You cannot pass through it.',
+                       'descwords' : ['blockage',_('blockage')],
                        'roomdesc' : 'a blockage',
                        'visible' : True,
                        'blockid' : '1',
@@ -1482,19 +1470,21 @@ class Game(object):
         # dictionary of items that will be available later on
         self.ghostitems = {
                 'bayonet' : {
+                    'name' : 'bayonet',
                     'image' : 'images/bayonet.png',
                     'roomdesc' : 'a bayonet',
                     'desc' : 'A handy although not that sharp custom bayonet',
-                    'descwords' : ['spear','bayonet'],
+                    'descwords' : ['spear','bayonet',_('spear'),_('bayonet')],
                     'summonmessage' : 'Clever! You have made a bayonet out of a stick and that rusty knife.',
                     'visible' : True,
                     'takeable' : False
                 },
                 'papyrus' : {
+                    'name' : 'papyrus',
                     'image' : 'images/papyrus.png',
                     'roomdesc' : 'a piece of papyrus',
                     'desc' : 'An oldish handmade papyrus. It almost seem real.',
-                    'descwords' : ['papyrus'],
+                    'descwords' : ['papyrus',_('papyrus')],
                     'summonmessage' : 'Who would have thought it... you have made a papyrus out of sand and a piece of paper.',
                     'visible' : True,
                     'mixwith' : {
@@ -1504,10 +1494,11 @@ class Game(object):
                     'takeable' : False
                 },
                 'pen' : {
+                    'name' : 'pen',
                     'image' : 'images/pen.png',
                     'roomdesc' : 'a pen',
                     'desc' : 'A pen with strange ink, ready to be used.',
-                    'descwords' : ['pen'],
+                    'descwords' : ['pen',_('pen')],
                     'summonmessage' : 'Yes, you now can use the feather as a pen and write with that curious ink.',
                     'visible' : True,
                     'mixwith' : {
@@ -1517,10 +1508,11 @@ class Game(object):
                     'takeable' : False
                 },
                 'script' : {
+                    'name' : 'script',
                     'image' : 'images/script.png',
                     'roomdesc' : 'a script',
                     'desc' : 'A very unintelligible script.',
-                    'descwords' : ['script'],
+                    'descwords' : ['script',_('script')],
                     'summonmessage' : 'As you were writing, your mind went to dark places. I think that ink took control of your hand for a while...',
                     'visible' : True,
                     'mixwith' : {
@@ -1530,10 +1522,11 @@ class Game(object):
                     'takeable' : False
                 },
                 'spell' : {
+                    'name' : 'spell',
                     'image' : 'images/spell.png',
                     'roomdesc' : 'a spell',
                     'desc' : 'An "Open Spell" summoned all by yourself. Yeah!',
-                    'descwords' : ['spell'],
+                    'descwords' : ['spell',_('spell')],
                     'summonmessage' : 'Holding the key with one hand, and reading the script outloud (don\'t worry, nobody\'s watching), created a magical spell.',
                     'visible' : True,
                     'takeable' : False
