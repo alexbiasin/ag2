@@ -254,7 +254,7 @@ msgstr "Quizá desapareció."
 
 #: ag2.py:802 ag2.py:807
 msgid "I don't see any "
-msgstr "No veo ningún "
+msgstr "No veo "
 
 #: ag2.py:805
 msgid "Yes, you can go "
@@ -262,7 +262,7 @@ msgstr "Sí, podrías ir a "
 
 #: ag2.py:807 ag2.py:819
 msgid "The "
-msgstr "Le "
+msgstr " "
 
 #: ag2.py:807 ag2.py:826
 msgid " is not here"
@@ -282,11 +282,11 @@ msgstr ", justo lo que estabas buscando"
 
 #: ag2.py:819
 msgid "At last, the glorious "
-msgstr "Por fin, la gloriosa "
+msgstr "Por fin, conseguiste "
 
 #: ag2.py:819
 msgid "Yeah! You have gotten the "
-msgstr "Vamos! Conseguiste la "
+msgstr "Vamos! Conseguiste "
 
 #: ag2.py:823
 msgid "Nah! It's like painted to the background"
@@ -294,7 +294,7 @@ msgstr "No! Está como pintado al lienzo del fondo"
 
 #: ag2.py:823
 msgid "You can't get the "
-msgstr "No podés agarrar la "
+msgstr "No podés agarrar "
 
 #: ag2.py:823 ag2.py:826
 msgid "You wish!"
@@ -310,7 +310,7 @@ msgstr " no me cuadra."
 
 #: ag2.py:846 ag2.py:876
 msgid " is meant to be used with the "
-msgstr " esté pensado para usarse con "
+msgstr " sea algo que esté pensado para usarse con "
 
 #: ag2.py:846 ag2.py:876
 msgid " with "
@@ -322,15 +322,15 @@ msgstr "No puedo usar "
 
 #: ag2.py:846 ag2.py:876
 msgid "I don't think the "
-msgstr "No creo que la "
+msgstr "No creo que "
 
 #: ag2.py:860 ag2.py:872
 msgid " is not meant to be used with the "
-msgstr " no está pensada para usarse con la "
+msgstr " no es algo pensado para usarse con "
 
 #: ag2.py:860 ag2.py:872
 msgid "I think the "
-msgstr "No creo que la "
+msgstr "No creo que "
 
 #: ag2.py:862
 msgid "Don't be repetitive dude!"
@@ -358,7 +358,7 @@ msgstr " alrededor."
 
 #: ag2.py:878
 msgid "There is no "
-msgstr "No hay ninguna "
+msgstr "No hay signos de "
 
 #: ag2.py:878
 msgid "Try something else."
@@ -366,7 +366,7 @@ msgstr "A ver, probemos otra cosa."
 
 #: ag2.py:880
 msgid "You don't have any "
-msgstr "No tenés ninguna "
+msgstr "No tenés "
 
 #: ag2.py:946
 msgid "Maybe if you start using the \"get\" command..."
@@ -478,7 +478,7 @@ msgstr "Esta parte del bosque me produce mareos."
 
 #: ag2.py:1186
 msgid "a knife beneath the tree"
-msgstr "una navaja"
+msgstr "una navaja debajo del árbol"
 
 #: ag2.py:1187
 msgid "Some rusty knife"
@@ -551,6 +551,10 @@ msgstr "un deck de madera"
 #: ag2.py:1321
 msgid "a not-so-confy wooden bench. And no, you can't sit there."
 msgstr "un banco de madera, no muy cómodo. Y no, no nos vamos a sentar ahí."
+
+#: ag2.py:1322
+msgid "bench"
+msgstr "banco"
 
 #: ag2.py:1322
 msgid "a wooden bench"

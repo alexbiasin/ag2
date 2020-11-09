@@ -833,13 +833,13 @@ class Game(object):
                 if (itemstr in self.rooms[self.currentRoom]['directions'].keys()):
                     mensaje = _('Yes, you can go ') + _(itemstr)
                 else:
-                    mensaje = rndStrMemory([_('The ') + _(itemstr) + _(' is not here'), _('I don\'t see any ') + _(itemstr)])
+                    mensaje = rndStrMemory([_('The ') + articuloSegunGenero(itemstr) + _(itemstr) + _(' is not here'), _('I don\'t see any ') + _(itemstr)])
         self.globalMessage(mensaje)
 
     def comandoGetItem(self,itemstr):
         item = self.findItemInInventory(itemstr)
         if (item):
-            mensaje = _('You already have the ') + _(itemstr)
+            mensaje = _('You already have the ') + articuloSegunGenero(itemstr) + _(itemstr)
         else:
             log('DEBUG',itemstr, _(itemstr), self.rooms[self.currentRoom]['items'])
             item = self.findItemInRoom(itemstr)
@@ -848,14 +848,14 @@ class Game(object):
                     #add the item to their inventory
                     self.inventory[item] = self.rooms[self.currentRoom]['items'][item]
                     #display a helpful message
-                    mensaje = rndStrMemory([_(itemstr) + _(' got!'),_('Yeah! You have gotten the ') + _(itemstr), _('The ') + _(itemstr) + _(', just what you\'ve been looking for'), _('At last, the glorious ') + _(itemstr) ])
+                    mensaje = rndStrMemory([_(itemstr) + _(' got!'),_('Yeah! You have gotten the ') + articuloSegunGenero(itemstr) + _(itemstr), _('The ') + articuloSegunGenero(itemstr, 'upper') + _(itemstr) + _(', just what you\'ve been looking for'), _('At last, the glorious ') + articuloSegunGenero(itemstr) + _(itemstr) ])
                     #delete the item from the room
                     del self.rooms[self.currentRoom]['items'][item]
                 else:
-                    mensaje = rndStrMemory([_('You can\'t get the ') + _(itemstr), _('Nah! It\'s like painted to the background'), _('You wish!')])
+                    mensaje = rndStrMemory([_('You can\'t get the ') + articuloSegunGenero(itemstr) + _(itemstr), _('Nah! It\'s like painted to the background'), _('You wish!')])
             else:
                 #tell them they can't get it
-                mensaje = rndStrMemory([_(itemstr) + _(' is not here'), _('Nah!'), _('You wish!')])
+                mensaje = rndStrMemory([articuloSegunGenero(itemstr,'upper') + _(itemstr) + _(' is not here'), _('Nah!'), _('You wish!')])
         self.globalMessage(mensaje)
         
     def comandoUse(self, itemstr1, itemstr2):
@@ -876,7 +876,7 @@ class Game(object):
                     #display a helpful message
                     mensaje = _(self.inventory[nuevoitem]['summonmessage'])
                 else:
-                    mensaje = rndStrMemory([_('Can\'t use ') + _(itemstr1) + _(' with ') + _(itemstr2) + '!',_('I don\'t think the ') + _(itemstr1) + _(' is meant to be used with the ') + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
+                    mensaje = rndStrMemory([_('Can\'t use ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' with ') + articuloSegunGenero(itemstr2) + _(itemstr2) + '!',_('I don\'t think the ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' is meant to be used with the ') + articuloSegunGenero(itemstr2) + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
             else:
                 item2 = self.findItemInRoom(itemstr2)
                 if (item2): # accionar algo que esta 'locked' en el room
@@ -892,7 +892,7 @@ class Game(object):
                                 else:
                                     mensaje = 'OJO: el iteminside no esta en '+self.currentRoom # no debiera llegar aca
                             else:
-                                mensaje = _('I think the ') + _(itemstr1) + _(' is not meant to be used with the ') + _(itemstr2) + '.'
+                                mensaje = _('I think the ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' is not meant to be used with the ') + articuloSegunGenero(itemstr2) + _(itemstr2) + '.'
                         else:
                             mensaje = rndStrMemory([_('Not again!'), _('You\'ve already done that.'), _('Don\'t be repetitive dude!')])
                     elif ('blocked' in self.rooms[self.currentRoom]['items'][item2]): # destrabar algo para poder pasar
@@ -904,15 +904,15 @@ class Game(object):
                                 self.rooms[self.currentRoom]['blockages'][blockid]['active'] = False # libero el bloqueo para que el player pueda pasar
                                 mensaje = _(self.rooms[self.currentRoom]['items'][item2]['unlockingtext'])
                             else:
-                                mensaje = _('I think the ') + _(itemstr1) + _(' is not meant to be used with the ') + _(itemstr2) + '.'
+                                mensaje = _('I think the ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' is not meant to be used with the ') + articuloSegunGenero(itemstr2) + _(itemstr2) + '.'
                         else:
                             mensaje = rndStrMemory([_('Are you still seeing that?'), _('You\'ve already done that.'), _('Don\'t be repetitive pal!')])
                     else:
-                        mensaje = rndStrMemory([_('Can\'t use ') + _(itemstr1) + _(' with ') + _(itemstr2) + '!', _('I don\'t think the ') + _(itemstr1) + _(' is meant to be used with the ') + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
+                        mensaje = rndStrMemory([_('Can\'t use ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' with ') + articuloSegunGenero(itemstr2) + _(itemstr2) + '!', _('I don\'t think the ') + articuloSegunGenero(itemstr1) + _(itemstr1) + _(' is meant to be used with the ') + articuloSegunGenero(itemstr2) + _(itemstr2), '...' + _(itemstr1) + _(' with ') + _(itemstr2) + _(' does not compute.')])
                 else:
                     mensaje = rndStrMemory([_('There is no ') + _(itemstr2) + _(' around.'), _('Try something else.')])
         else:
-            mensaje = _('You don\'t have any ') + _(itemstr1)
+            mensaje = _('You don\'t have any ') + articuloSegunGenero(itemstr1) + _(itemstr1)
         self.globalMessage(mensaje)
 
     def loadMusic(self,musicpath):
@@ -978,6 +978,7 @@ class Game(object):
     def drawInventory(self):
         # si no tengo nada en el inventario, mostrar mensaje
         if bool(self.inventory) == False:
+            self.show_inventory = False
             self.globalMessage(rndStrMemory([_('You are carrying nothing!'), _('Nothing in your pockets so far'), _('Maybe if you start using the "get" command...')]))
         else:
             itemsperrow = 3 # max columns
@@ -1559,10 +1560,12 @@ class Game(object):
                             self.textinput.input_string = self.previoustext # repetir el ultimo comando
                             self.textinput.cursor_position = largo
                     if (event.key == pygame.K_F11):
+                        LANG = 'ES'
                         langES.install()
                         _ = langES.gettext
                         self.globalMessage('Idioma español seleccionado')
                     if (event.key == pygame.K_F12):
+                        LANG = 'EN'
                         langEN.install()
                         _ = langEN.gettext
                         self.globalMessage('English language selected')
@@ -1869,12 +1872,40 @@ def decompress_pickle(file):
     data = cPickle.load(data)
     return data
 
+# Excepcionalmente, uso esta funcion dado que i18n gettext no lo tiene en cuenta.
+# Dada una palabra en castellano, y su case ('lower' | 'upper') devuelvo el articulo correcto.
+def articuloSegunGenero(word, case='lower'):
+    if LANG=='EN':
+        return ''
+    articulo = '' # por defecto devuelvo vacio
+    if word in ('papel','banco','arbusto','escrito','hechizo','papiro','cortante','cartel','deck','puente','bloqueo'):
+        if case == 'lower':
+            articulo = 'el'
+        else:
+            articulo = 'El'
+    elif word in ('arbustos'):
+        if case == 'lower':
+            articulo = 'los'
+        else:
+            articulo = 'Los'
+    elif word in ('rama','arena','tinta','navaja','bayoneta','llave','hoja','pluma','lapicera','lanza'):
+        if case == 'lower':
+            articulo = 'la'
+        else:
+            articulo = 'La'
+            
+    if articulo != '':
+        articulo = articulo + ' '
+        
+    return articulo
+
 def main():  # type: () -> None
     global log_level
     global screenrel
     global memoryList
     global langEN
     global langES
+    global LANG # 'EN' o 'ES'
 
     log_level = 'NONE' # NONE , INFO , DEBUG
     screenrel = 1.5 # relacion entre tamaño de pantalla y tamaño de ventana
@@ -1884,6 +1915,7 @@ def main():  # type: () -> None
     CURR_DIR = os.getcwd()
     langEN = gettext.translation(domain='en', languages=['en'], localedir=CURR_DIR)
     langES = gettext.translation(domain='es', languages=['es'], localedir=CURR_DIR)
+    LANG = 'ES'
     langES.install()
     _ = langES.gettext
 

@@ -1,0 +1,33 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2020-11-01 19:47+-03\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: ENCODING\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: ag2.py:435
+msgid "Bye bye!"
+msgstr "chau"
+
+#: ag2.py:435
+msgid "Don't be frustrated. You'll make it next time."
+msgstr ""
+
+#: ag2.py:435
+msgid "Is it bedtime already?"
+msgstr ""
+
+#: ag2.py:435
+msgid "We'll miss you..."
+msgstr ""
+

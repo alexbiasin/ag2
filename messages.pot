@@ -5,183 +5,183 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-11-01 19:47+-03\n"
+"POT-Creation-Date: 2020-11-02 19:11+-03\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: ENCODING\n"
 "Generated-By: pygettext.py 1.5\n"
 
 
 #: ag2.py:435
 msgid "Bye bye!"
-msgstr "Bye bye!"
+msgstr ""
 
 #: ag2.py:435
 msgid "Don't be frustrated. You'll make it next time."
-msgstr "Don't be frustrated. You'll make it next time."
+msgstr ""
 
 #: ag2.py:435
 msgid "Is it bedtime already?"
-msgstr "Is it bedtime already?"
+msgstr ""
 
 #: ag2.py:435
 msgid "We'll miss you..."
-msgstr "We'll miss you..."
+msgstr ""
 
 #: ag2.py:690
 msgid "Game saved"
-msgstr "Game saved"
+msgstr ""
 
 #: ag2.py:693
 msgid "Game loaded"
-msgstr "Game loaded"
+msgstr ""
 
 #: ag2.py:695
 msgid "You have not saved any game before"
-msgstr "You have not saved any game before"
+msgstr ""
 
 #: ag2.py:698
 msgid "Jump! Jump! Here comes the man..."
-msgstr "Jump! Jump! Here comes the man..."
+msgstr ""
 
 #: ag2.py:698
 msgid "There is no jumping in this game"
-msgstr "There is no jumping in this game"
+msgstr ""
 
 #: ag2.py:698
 msgid "This is Kaos. We don't jump here!"
-msgstr "This is Kaos. We don't jump here!"
+msgstr ""
 
 #: ag2.py:698
 msgid "Wrong game for jumping I think"
-msgstr "Wrong game for jumping I think"
+msgstr ""
 
 #: ag2.py:698
 msgid "You feel exhausted just by thinking of jumping"
-msgstr "You feel exhausted just by thinking of jumping"
+msgstr ""
 
 #: ag2.py:700
 msgid "Are you nuts?"
-msgstr "Are you nuts?"
+msgstr ""
 
 #: ag2.py:700
 msgid "I don't have my snorkel"
-msgstr "I don't have my snorkel"
+msgstr ""
 
 #: ag2.py:700
 msgid "No diving in this area!"
-msgstr "No diving in this area!"
+msgstr ""
 
 #: ag2.py:700
 msgid "There are better moments for diving"
-msgstr "There are better moments for diving"
+msgstr ""
 
 #: ag2.py:700
 msgid "You should change your pills."
-msgstr "You should change your pills."
+msgstr ""
 
 #: ag2.py:702
 msgid "Is that what will let you out of this forest?"
-msgstr "Is that what will let you out of this forest?"
+msgstr ""
 
 #: ag2.py:702
 msgid "Nah, I don't wan't to sit, thanks."
-msgstr "Nah, I don't wan't to sit, thanks."
+msgstr ""
 
 #: ag2.py:702
 msgid "Sit? Am I a dog?"
-msgstr "Sit? Am I a dog?"
+msgstr ""
 
 #: ag2.py:702
 msgid "There is no time to be wasting"
-msgstr "There is no time to be wasting"
+msgstr ""
 
 #: ag2.py:702
 msgid "Walking is good for your health."
-msgstr "Walking is good for your health."
+msgstr ""
 
 #: ag2.py:704
 msgid "Bored already?"
-msgstr "Bored already?"
+msgstr ""
 
 #: ag2.py:704
 msgid "Come on you lazy cow!"
-msgstr "Come on you lazy cow!"
+msgstr ""
 
 #: ag2.py:704
 msgid "Definitely not!"
-msgstr "Definitely not!"
+msgstr ""
 
 #: ag2.py:704
 msgid "Let me think... no!"
-msgstr "Let me think... no!"
+msgstr ""
 
 #: ag2.py:704
 msgid "No! Wake up!"
-msgstr "No! Wake up!"
+msgstr ""
 
 #: ag2.py:704
 msgid "There is no time for a nap"
-msgstr "There is no time for a nap"
+msgstr ""
 
 #: ag2.py:706
 msgid "No one can hear you"
-msgstr "No one can hear you"
+msgstr ""
 
 #: ag2.py:706
 msgid "Shhh!"
-msgstr "Shhh!"
+msgstr ""
 
 #: ag2.py:706
 msgid "There is no one around"
-msgstr "There is no one around"
+msgstr ""
 
 #: ag2.py:706
 msgid "There is no use in talking, screaming or shouting"
-msgstr "There is no use in talking, screaming or shouting"
+msgstr ""
 
 #: ag2.py:718
 msgid "By \"go\" you mean the ancient board game?"
-msgstr "By \"go\" you mean the ancient board game?"
+msgstr ""
 
 #: ag2.py:718
 msgid "Deprecated command, just walk"
-msgstr "Deprecated command, just walk"
+msgstr ""
 
 #: ag2.py:718
 msgid "Games evolve"
-msgstr "Games evolve"
+msgstr ""
 
 #: ag2.py:718
 msgid "Go, go, go!"
-msgstr "Go, go, go!"
+msgstr ""
 
 #: ag2.py:718
 msgid "Walking works just fine"
-msgstr "Walking works just fine"
+msgstr ""
 
 #: ag2.py:722
 msgid "Hit F1 key for help on commands"
-msgstr "Hit F1 key for help on commands"
+msgstr ""
 
 #: ag2.py:722
 msgid "Incorrect command"
-msgstr "Incorrect command"
+msgstr ""
 
 #: ag2.py:722
 msgid "Not sure what you mean"
-msgstr "Not sure what you mean"
+msgstr ""
 
 #: ag2.py:722
 msgid "That does not compute"
-msgstr "That does not compute"
+msgstr ""
 
 #: ag2.py:722
 msgid "Try something else"
-msgstr "Try something else"
+msgstr ""
 
 #: ag2.py:726
 msgid ""
@@ -196,470 +196,452 @@ msgid ""
 "        TAB : shows your inventory.                                                     \n"
 "        "
 msgstr ""
-"               -< Command Help >-                                        \n"
-"        look : describes what's around you.                                             \n"
-"        look [item] : describes an item in your inventory or in the room.               \n"
-"        get [item] : takes an object of the room and keeps it in your inventory.        \n"
-"        use [item] with [item] : tries to make an interaction between the two items.    \n"
-"        save : records your game so you can play some other day.                     \n"
-"        load : restores the game that you had saved before.                         \n"
-"        F3 : repeats last command.                                                      \n"
-"        TAB : shows your inventory.                                                     \n"
-"        "
 
 #: ag2.py:744
 msgid "Consider getting a compass"
-msgstr "Consider getting a compass"
+msgstr ""
 
 #: ag2.py:744
 msgid "Danger! Going that way is demential (because it doesn't exists)"
-msgstr "Danger! Going that way is demential (because it doesn't exists)"
+msgstr ""
 
 #: ag2.py:744
 msgid "I don't think going that way is the right way"
-msgstr "I don't think going that way is the right way"
+msgstr ""
 
 #: ag2.py:744
 msgid "Really? "
-msgstr "Really? "
+msgstr ""
 
 #: ag2.py:744
 msgid "You can't go that way!"
-msgstr "You can't go that way!"
+msgstr ""
 
 #: ag2.py:751
 msgid " You see "
-msgstr " You see "
+msgstr ""
 
 #: ag2.py:760
 msgid "and "
-msgstr "and "
+msgstr ""
 
 #: ag2.py:794 ag2.py:798 ag2.py:800
 msgid "You see "
-msgstr "You see "
+msgstr ""
 
 #: ag2.py:802
 msgid " is still there?"
-msgstr " is still there?"
+msgstr ""
 
 #: ag2.py:802
 msgid "Are you sure the "
-msgstr "Are you sure the "
+msgstr ""
 
 #: ag2.py:802
 msgid "It may have dissapeared, you know."
-msgstr "It may have dissapeared, you know."
+msgstr ""
 
 #: ag2.py:802 ag2.py:807
 msgid "I don't see any "
-msgstr "I don't see any "
+msgstr ""
 
 #: ag2.py:805
 msgid "Yes, you can go "
-msgstr "Yes, you can go "
+msgstr ""
 
 #: ag2.py:807 ag2.py:819
 msgid "The "
-msgstr "The "
+msgstr ""
 
 #: ag2.py:807 ag2.py:826
 msgid " is not here"
-msgstr " is not here"
+msgstr ""
 
 #: ag2.py:812
 msgid "You already have the "
-msgstr "You already have the "
+msgstr ""
 
 #: ag2.py:819
 msgid " got!"
-msgstr " got!"
+msgstr ""
 
 #: ag2.py:819
 msgid ", just what you've been looking for"
-msgstr ", just what you've been looking for"
+msgstr ""
 
 #: ag2.py:819
 msgid "At last, the glorious "
-msgstr "At last, the glorious "
+msgstr ""
 
 #: ag2.py:819
 msgid "Yeah! You have gotten the "
-msgstr "Yeah! You have gotten the "
+msgstr ""
 
 #: ag2.py:823
 msgid "Nah! It's like painted to the background"
-msgstr "Nah! It's like painted to the background"
+msgstr ""
 
 #: ag2.py:823
 msgid "You can't get the "
-msgstr "You can't get the "
+msgstr ""
 
 #: ag2.py:823 ag2.py:826
 msgid "You wish!"
-msgstr "You wish!"
+msgstr ""
 
 #: ag2.py:826
 msgid "Nah!"
-msgstr "Nah!"
+msgstr ""
 
 #: ag2.py:846 ag2.py:876
 msgid " does not compute."
-msgstr " does not compute."
+msgstr ""
 
 #: ag2.py:846 ag2.py:876
 msgid " is meant to be used with the "
-msgstr " is meant to be used with the "
+msgstr ""
 
 #: ag2.py:846 ag2.py:876
 msgid " with "
-msgstr " with "
+msgstr ""
 
 #: ag2.py:846 ag2.py:876
 msgid "Can't use "
-msgstr "Can't use "
+msgstr ""
 
 #: ag2.py:846 ag2.py:876
 msgid "I don't think the "
-msgstr "I don't think the "
+msgstr ""
 
 #: ag2.py:860 ag2.py:872
 msgid " is not meant to be used with the "
-msgstr " is not meant to be used with the "
+msgstr ""
 
 #: ag2.py:860 ag2.py:872
 msgid "I think the "
-msgstr "I think the "
+msgstr ""
 
 #: ag2.py:862
 msgid "Don't be repetitive dude!"
-msgstr "Don't be repetitive dude!"
+msgstr ""
 
 #: ag2.py:862
 msgid "Not again!"
-msgstr "Not again!"
+msgstr ""
 
 #: ag2.py:862 ag2.py:874
 msgid "You've already done that."
-msgstr "You've already done that."
+msgstr ""
 
 #: ag2.py:874
 msgid "Are you still seeing that?"
-msgstr "Are you still seeing that?"
+msgstr ""
 
 #: ag2.py:874
 msgid "Don't be repetitive pal!"
-msgstr "Don't be repetitive pal!"
+msgstr ""
 
 #: ag2.py:878
 msgid " around."
-msgstr " around."
+msgstr ""
 
 #: ag2.py:878
 msgid "There is no "
-msgstr "There is no "
+msgstr ""
 
 #: ag2.py:878
 msgid "Try something else."
-msgstr "Try something else."
+msgstr ""
 
 #: ag2.py:880
 msgid "You don't have any "
-msgstr "You don't have any "
+msgstr ""
 
 #: ag2.py:946
 msgid "Maybe if you start using the \"get\" command..."
-msgstr "Maybe if you start using the \"get\" command..."
+msgstr ""
 
 #: ag2.py:946
 msgid "Nothing in your pockets so far"
-msgstr "Nothing in your pockets so far"
+msgstr ""
 
 #: ag2.py:946
 msgid "You are carrying nothing!"
-msgstr "You are carrying nothing!"
+msgstr ""
 
 #: ag2.py:1075
 msgid "You are in a deep and millenary forest."
-msgstr "You are in a deep and millenary forest."
+msgstr ""
 
 #: ag2.py:1096
 msgid "a stick"
-msgstr "a stick"
+msgstr ""
 
 #: ag2.py:1097
 msgid "A heavy and strong wood stick"
-msgstr "A heavy and strong wood stick"
+msgstr ""
 
 #: ag2.py:1098
 msgid "branch"
-msgstr "branch"
+msgstr ""
 
 #: ag2.py:1098 ag2.py:1191
 msgid "stick"
-msgstr "stick"
+msgstr ""
 
 #: ag2.py:1101 ag2.py:1188
 msgid "knife"
-msgstr "knife"
+msgstr ""
 
 #: ag2.py:1102 ag2.py:1111 ag2.py:1192 ag2.py:1414 ag2.py:1418
 msgid "bayonet"
-msgstr "bayonet"
+msgstr ""
 
 #: ag2.py:1107
 msgid "some bushes"
-msgstr "some bushes"
+msgstr ""
 
 #: ag2.py:1108
 msgid "a few thick bushes that may conceal something"
-msgstr "a few thick bushes that may conceal something"
+msgstr ""
 
 #: ag2.py:1109
 msgid "bush"
-msgstr "bush"
+msgstr ""
 
 #: ag2.py:1109
 msgid "bushes"
-msgstr "bushes"
+msgstr ""
 
 #: ag2.py:1112
 msgid "You have cut through the bushes and uncovered something."
-msgstr "You have cut through the bushes and uncovered something."
+msgstr ""
 
 #: ag2.py:1113 ag2.py:1124 ag2.py:1457
 msgid "key"
-msgstr "key"
+msgstr ""
 
 #: ag2.py:1114
 msgid "chopped bushes that now shows a key laying in the grass"
-msgstr "chopped bushes that now shows a key laying in the grass"
+msgstr ""
 
 #: ag2.py:1122
 msgid "a key behind the bushes"
-msgstr "a key behind the bushes"
+msgstr ""
 
 #: ag2.py:1123
 msgid "It's a golden key"
-msgstr "It's a golden key"
+msgstr ""
 
 #: ag2.py:1127 ag2.py:1432 ag2.py:1445 ag2.py:1449 ag2.py:1453
 msgid "script"
-msgstr "script"
+msgstr ""
 
 #: ag2.py:1128 ag2.py:1377 ag2.py:1458 ag2.py:1466
 msgid "spell"
-msgstr "spell"
+msgstr ""
 
 #: ag2.py:1135
 msgid "This is a quiet and sunny beach."
-msgstr "This is a quiet and sunny beach."
+msgstr ""
+
+#: ag2.py:1136
+msgid "images/playa-isla.jpg"
+msgstr ""
+
+#: ag2.py:1137
+msgid "images/playa-isla_map.jpg"
+msgstr ""
 
 #: ag2.py:1154
 msgid "Just, you know, sand."
-msgstr "Just, you know, sand."
+msgstr ""
 
 #: ag2.py:1156 ag2.py:1332
 msgid "sand"
-msgstr "sand"
+msgstr ""
 
 #: ag2.py:1158
 msgid "paper"
-msgstr "paper"
+msgstr ""
 
 #: ag2.py:1159 ag2.py:1333 ag2.py:1423 ag2.py:1427 ag2.py:1444
 msgid "papyrus"
-msgstr "papyrus"
+msgstr ""
 
 #: ag2.py:1166
 msgid "This part of the forest feels a bit dizzy."
-msgstr "This part of the forest feels a bit dizzy."
+msgstr ""
 
 #: ag2.py:1186
 msgid "a knife beneath the tree"
-msgstr "a knife beneath the tree"
+msgstr ""
 
 #: ag2.py:1187
 msgid "Some rusty knife"
-msgstr "Some rusty knife"
+msgstr ""
 
 #: ag2.py:1188
 msgid "blade"
-msgstr "blade"
+msgstr ""
 
 #: ag2.py:1188
 msgid "cutter"
-msgstr "cutter"
+msgstr ""
 
 #: ag2.py:1199
 msgid "The same forest with bifurcated paths."
-msgstr "The same forest with bifurcated paths."
+msgstr ""
 
 #: ag2.py:1222
 msgid "A nice looking feather. I'm sure the bird does not need it anymore."
-msgstr "A nice looking feather. I'm sure the bird does not need it anymore."
+msgstr ""
 
 #: ag2.py:1223
 msgid "a feather"
-msgstr "a feather"
+msgstr ""
 
 #: ag2.py:1226 ag2.py:1275
 msgid "ink"
-msgstr "ink"
+msgstr ""
 
 #: ag2.py:1227 ag2.py:1279 ag2.py:1431 ag2.py:1436 ag2.py:1440
 msgid "pen"
-msgstr "pen"
+msgstr ""
 
 #: ag2.py:1234
-msgid "This area of the country has a water mill."
-msgstr "This area of the country has a water mill."
+msgid "This area of the country has a water mill and a sign."
+msgstr ""
 
 #: ag2.py:1267
 msgid "a sign that explains how to escape the forest by going left, take another left, go up the cliff, and down the hill, and the rest was erased by some funny guy. Maybe you can write your own path..."
-msgstr "a sign that explains how to escape the forest by going left, take another left, go up the cliff, and down the hill, and the rest was erased by some funny guy. Maybe you can write your own path..."
-
-#: ag2.py:1268
-msgid "sign"
-msgstr "sign"
+msgstr ""
 
 #: ag2.py:1268
 msgid "a wooden sign"
-msgstr "a wooden sign"
+msgstr ""
 
 #: ag2.py:1274 ag2.py:1328
 msgid "A full jar of strange ink. It may seem black but when you look at it closely, it has an uncommon glow."
-msgstr "A full jar of strange ink. It may seem black but when you look at it closely, it has an uncommon glow."
+msgstr ""
 
 #: ag2.py:1278
 msgid "feather"
-msgstr "feather"
+msgstr ""
 
 #: ag2.py:1286
 msgid "From here, you can enter the forest from the beach."
-msgstr "From here, you can enter the forest from the beach."
+msgstr ""
 
 #: ag2.py:1314
 msgid "a deck that connects the beach with the forest. You can walk on it."
-msgstr "a deck that connects the beach with the forest. You can walk on it."
+msgstr ""
 
 #: ag2.py:1315
 msgid "a wooden deck"
-msgstr "a wooden deck"
+msgstr ""
 
 #: ag2.py:1321
 msgid "a not-so-confy wooden bench. And no, you can't sit there."
-msgstr "a not-so-confy wooden bench. And no, you can't sit there."
-
-#: ag2.py:1322
-msgid "bench"
-msgstr "bench"
+msgstr ""
 
 #: ag2.py:1322
 msgid "a wooden bench"
-msgstr "a wooden bench"
+msgstr ""
 
 #: ag2.py:1329
 msgid "a piece of paper left on the floor"
-msgstr "a piece of paper left on the floor"
+msgstr ""
 
 #: ag2.py:1340
 msgid "An extremelly beautiful waterfall crossed by a bridge."
-msgstr "An extremelly beautiful waterfall crossed by a bridge."
+msgstr ""
 
 #: ag2.py:1365
 msgid "a bridge that leads outside the forest."
-msgstr "a bridge that leads outside the forest."
-
-#: ag2.py:1366
-msgid "bridge"
-msgstr "bridge"
+msgstr ""
 
 #: ag2.py:1366
 msgid "a bridge"
-msgstr "a bridge"
+msgstr ""
 
 #: ag2.py:1372
 msgid "some magical blockage over the bridge. You cannot pass through it."
-msgstr "some magical blockage over the bridge. You cannot pass through it."
-
-#: ag2.py:1373
-msgid "blockage"
-msgstr "blockage"
+msgstr ""
 
 #: ag2.py:1373
 msgid "a blockage"
-msgstr "a blockage"
+msgstr ""
 
 #: ag2.py:1378
 msgid "You have cast a magical key spell and disolved the blockage!"
-msgstr "You have cast a magical key spell and disolved the blockage!"
+msgstr ""
 
 #: ag2.py:1384
 msgid "You have finally arrived to the end of this game. Hope to see you again in the next one."
-msgstr "You have finally arrived to the end of this game. Hope to see you again in the next one."
+msgstr ""
 
 #: ag2.py:1416
 msgid "a bayonet"
-msgstr "a bayonet"
+msgstr ""
 
 #: ag2.py:1417
 msgid "A handy although not that sharp custom bayonet"
-msgstr "A handy although not that sharp custom bayonet"
+msgstr ""
 
 #: ag2.py:1418
 msgid "spear"
-msgstr "spear"
+msgstr ""
 
 #: ag2.py:1419
 msgid "Clever! You have made a bayonet out of a stick and that rusty knife."
-msgstr "Clever! You have made a bayonet out of a stick and that rusty knife."
+msgstr ""
 
 #: ag2.py:1425
 msgid "a piece of papyrus"
-msgstr "a piece of papyrus"
+msgstr ""
 
 #: ag2.py:1426
 msgid "An oldish handmade papyrus. It almost seem real."
-msgstr "An oldish handmade papyrus. It almost seem real."
+msgstr ""
 
 #: ag2.py:1428
 msgid "Who would have thought it... you have made a papyrus out of sand and a piece of paper."
-msgstr "Who would have thought it... you have made a papyrus out of sand and a piece of paper."
+msgstr ""
 
 #: ag2.py:1438
 msgid "a pen"
-msgstr "a pen"
+msgstr ""
 
 #: ag2.py:1439
 msgid "A pen with strange ink, ready to be used."
-msgstr "A pen with strange ink, ready to be used."
+msgstr ""
 
 #: ag2.py:1441
 msgid "Yes, you now can use the feather as a pen and write with that curious ink."
-msgstr "Yes, you now can use the feather as a pen and write with that curious ink."
+msgstr ""
 
 #: ag2.py:1451
 msgid "a script"
-msgstr "a script"
+msgstr ""
 
 #: ag2.py:1452
 msgid "A very unintelligible script."
-msgstr "A very unintelligible script."
+msgstr ""
 
 #: ag2.py:1454
 msgid "As you were writing, your mind went to dark places. I think that ink took control of your hand for a while..."
-msgstr "As you were writing, your mind went to dark places. I think that ink took control of your hand for a while..."
+msgstr ""
 
 #: ag2.py:1464
 msgid "a spell"
-msgstr "a spell"
+msgstr ""
 
 #: ag2.py:1465
 msgid "An \"Open Spell\" summoned all by yourself. Yeah!"
-msgstr "An \"Open Spell\" summoned all by yourself. Yeah!"
+msgstr ""
 
 #: ag2.py:1467
 msgid "Holding the key with one hand, and reading the script outloud (don't worry, nobody's watching), created a magical spell."
-msgstr "Holding the key with one hand, and reading the script outloud (don't worry, nobody's watching), created a magical spell."
+msgstr ""
 
