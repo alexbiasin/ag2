@@ -663,3 +663,34 @@ msgstr "An \"Open Spell\" summoned all by yourself. Yeah!"
 msgid "Holding the key with one hand, and reading the script outloud (don't worry, nobody's watching), created a magical spell."
 msgstr "Holding the key with one hand, and reading the script outloud (don't worry, nobody's watching), created a magical spell."
 
+#: ag2.py:480
+msgid "Save"
+msgstr "Save"
+
+#: ag2.py:482
+msgid "Load"
+msgstr "Load"
+
+#: ag2.py:484
+msgid "Audio enabled"
+msgstr "Audio enabled"
+
+#: ag2.py:486
+msgid "Language"
+msgstr "Language"
+
+#: ag2.py:486
+msgid "English"
+msgstr "English"
+
+#: ag2.py:486
+msgid "Spanish"
+msgstr "Spanish"
+
+#: ag2.py:489
+msgid "Quit"
+msgstr "Quit"
+
+#: ag2.py:496
+msgid "Text speed"
+msgstr "Text speed"

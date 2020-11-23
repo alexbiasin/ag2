@@ -668,3 +668,34 @@ msgstr "Un hechizo de apertura conjurado por vos mismo. Sí señor!"
 msgid "Holding the key with one hand, and reading the script outloud (don't worry, nobody's watching), created a magical spell."
 msgstr "Tomando la llave con una mano, y leyendo el escrito en voz alta (no te preocupes, nadie está mirando), creaste un hechizo mágico."
 
+#: ag2.py:480
+msgid "Save"
+msgstr "Guardar"
+
+#: ag2.py:482
+msgid "Load"
+msgstr "Cargar"
+
+#: ag2.py:484
+msgid "Audio enabled"
+msgstr "Audio activado"
+
+#: ag2.py:486
+msgid "Language"
+msgstr "Idioma"
+
+#: ag2.py:486
+msgid "English"
+msgstr "Inglés"
+
+#: ag2.py:486
+msgid "Spanish"
+msgstr "Español"
+
+#: ag2.py:489
+msgid "Quit"
+msgstr "Salir"
+
+#: ag2.py:496
+msgid "Text speed"
+msgstr "Velocidad del texto"

@@ -337,8 +337,306 @@ class Player(pygame.sprite.Sprite):
         if self.game.isPositionAllowed(colorxy) == False:
             return False        
         return True
-    
 
+#=------------- BUTTON -------------=#
+# Nota: In Python, classes, functions, methods and instances are all objects.
+# Al instanciar una Clase(args), hace un __call__, que hace un __new__ y luego un __init__
+# Se puede "imprimir" un objeto con: print(objeto.__dict__)
+class Button:
+    def __init__ (self, game, textcolor, backcolor, x, y, width, height, label='', image='', border=False):
+        self.screen = game.screen
+        self.game = game
+        self.textcolor = textcolor
+        self.backcolor = backcolor
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.label = label
+        self.image = image
+        self.border = border
+        self.borderwidth = 2
+        
+    def drawBack(self):
+        self.rect = self.game.drawRect(self.x, self.y, self.width, self.height, self.backcolor)
+
+    def drawBorder(self):
+        return pygame.draw.rect(self.screen, self.textcolor,(self.x, self.y, self.width, self.height), self.borderwidth)
+
+    def drawText(self):
+        self.game.drawCenteredText(self.label, self.textcolor, self.rect)
+        
+    def draw(self):
+        self.drawBack()        
+        if self.border:
+            self.drawBorder()
+        self.drawText()
+        
+    def isOver(self):
+        print('isOver')
+
+    def clicked(self, mousePos):
+        return self.rect.collidepoint(mousePos)
+
+class CheckBox(Button):
+    def __init__(self, game, textcolor, backcolor, x, y, width, height, label='', image='', checked=False):
+        Button.__init__(self, game, textcolor, backcolor, x, y, width, height, label, image='', border=True)
+        self.checked = checked
+    
+    def draw(self):
+        super().draw()
+        self.drawCheck()
+
+    def drawCheck(self):
+        rxpad = 20
+        ypad = 5
+        checkheight = self.height - (2 * ypad)
+        checkwidth = checkheight
+        x = self.x + self.width - rxpad - checkwidth
+        y = self.y + ypad
+        checkbackcolor = (self.backcolor[0] * 1.1, self.backcolor[1] * 1.1, self.backcolor[2] * 1.1)
+        self.checkrect = self.game.drawRect(x, y, checkwidth, checkheight, checkbackcolor)
+        pygame.draw.rect(self.screen, self.textcolor,(x, y, checkwidth, checkheight), self.borderwidth)
+        if self.checked:
+            pygame.draw.circle(self.screen, (200,20,20), self.checkrect.center, int((checkheight - ypad) / 2), 0)
+
+    def clicked(self, mousePos):
+        has_clicked = self.checkrect.collidepoint(mousePos)
+        if has_clicked:
+            self.checked = not self.checked
+        return has_clicked
+
+class SelectBox(Button):
+    def __init__(self, game, textcolor, backcolor, x, y, width, height, label, image, options, selected):
+        Button.__init__(self, game, textcolor, backcolor, x, y, width, height, label, image='', border=True)
+        self.options = options # array de opciones tipo key-value Dict
+        self.rects = [None]*2
+        # Ej: [{'EN','English'}, {'ES','Spanish'}]
+        self.selected = selected # la key selecionada
+    
+    def draw(self):
+        pygame.draw.rect(self.screen, self.backcolor,(self.x, self.y, self.width, self.height), self.borderwidth)
+        self.drawOptions()
+
+    def drawOptions(self):
+        xpad = 5
+        ypad = 5
+        # divido el ancho en [label + opciones] partes        
+        selectheight = self.height - (2 * ypad)
+        partes = 1 + len(self.options)
+        partwidth = (self.width - (2*xpad) ) / partes
+        x = self.x + xpad
+        y = self.y + ypad
+        labelrect = pygame.rect.Rect(x, y, partwidth, selectheight)
+        self.game.drawCenteredText(self.label, self.backcolor, labelrect)
+        optionlist = list(self.options)
+        for i in range(len(optionlist)):
+            optionlabel = self.options[optionlist[i]]
+            x += partwidth
+            if optionlist[i] == self.selected:
+                self.rects[i] = self.game.drawRect(x, y, partwidth, selectheight, self.backcolor)
+                self.game.drawCenteredText(optionlabel, self.textcolor, self.rects[i])
+            else:
+                self.rects[i] = pygame.draw.rect(self.screen, self.backcolor, (x, y, partwidth, selectheight), self.borderwidth)
+                self.game.drawCenteredText(optionlabel, self.backcolor, self.rects[i])
+
+    def clicked(self, mousePos):
+        optionlist = list(self.options)
+        has_clicked = False
+        for i in range(len(optionlist)):
+            if has_clicked == False:
+                has_clicked = self.rects[i].collidepoint(mousePos)
+                if has_clicked:
+                    self.selected = optionlist[i]
+                
+        return has_clicked
+
+class Slider(Button):
+    def __init__(self, game, textcolor, backcolor, x, y, width, height, label, image, value, minval, maxval):
+        Button.__init__(self, game, textcolor, backcolor, x, y, width, height, label, image='', border=True)
+        self.value = value
+        self.minval = minval
+        self.maxval = maxval
+
+    def draw(self):
+        pygame.draw.rect(self.screen, self.backcolor,(self.x, self.y, self.width, self.height), self.borderwidth)
+        self.drawSlider()
+        
+    def drawSlider(self):
+        xpad = 5
+        ypad = 5
+        # divido el ancho en [label + opciones] partes        
+        sliderheight = self.height - (2 * ypad)
+        partes = 3
+        textwidth = (self.width - (2*xpad) ) / partes
+        sliderwidth = textwidth * 2
+        x = self.x + xpad
+        y = self.y + ypad
+        # label
+        labelrect = pygame.rect.Rect(x, y, textwidth, sliderheight)
+        self.game.drawCenteredText(self.label, self.backcolor, labelrect)
+        # slider
+        x += textwidth
+        self.rect = pygame.draw.rect(self.screen, self.backcolor, (x, y, sliderwidth, sliderheight), self.borderwidth)
+        filledwidth = ((self.value-self.minval) / (self.maxval-self.minval)) * self.rect.width #+ self.rect.x
+        self.game.drawRect(x, y, filledwidth, sliderheight, self.backcolor)
+        
+    def clicked(self, mousePos):
+        has_clicked = self.rect.collidepoint(mousePos)
+        if has_clicked:
+            # calculo donde hizo click
+            clickedvalue = self.minval+((mousePos[0]-self.rect.x) / self.rect.width)*(self.maxval-self.minval)
+            if clickedvalue == 0:
+                clickedvalue = 0.1
+            self.value = clickedvalue
+                
+        return has_clicked
+        
+#=------------- MENU -------------=#
+class Menu(object):
+    def main(self, game):
+        self.screen = game.screen
+        self.game = game
+        # frame position, size and colors
+        r = 0.8
+        self.border = 5
+        self.width = self.game.width * r
+        self.height = self.game.height * r
+        self.x = (self.game.width - self.width) / 2
+        self.y = (self.game.height - self.height) / 2
+        self.bordercolor = (145, 145, 145)
+        self.innercolor = (205, 205, 205)
+        # Inner objects
+        self.closeButton = Button(self.game, (20,20,20), (170,240,170), self.x+self.width-(self.border*3), self.y, (self.border*3), (self.border*3), label='x', image='')
+        ypad = 30
+        xpad = 30
+        btntextcolor = self.game.textcolor
+        btnbackcolor = (98,65,204)
+        w = self.width - (2 * xpad)
+        h = 30
+        x = self.x + (self.width - w) / 2
+        y = self.y + ypad        
+        self.saveButton = Button(self.game, btntextcolor, btnbackcolor, x, y, w, h, label=_('Save'), image='', border=True)
+        y = y + h + ypad        
+        self.loadButton = Button(self.game, btntextcolor, btnbackcolor, x, y, w, h, label=_('Load'), image='', border=True)
+        y = y + h + ypad        
+        self.audioCheck = CheckBox(self.game, btnbackcolor, self.innercolor, x, y, w, h, label=_('Audio enabled'), image='', checked=self.game.audioEnabled)
+        y = y + h + ypad
+        opt = dict(EN=_('English'), ES=_('Spanish'))
+        self.languageSelect = SelectBox(self.game, btntextcolor, btnbackcolor, x, y, w, h+ypad/2, label=_('Language'), image='', options=opt, selected=LANG)
+        y = y + h + ypad*1.5
+        self.textSpeed = Slider(self.game, btntextcolor, btnbackcolor, x, y, w, h, label=_('Text speed'), image='', value=self.game.text_speed, minval=1, maxval=5)
+        y = y + h + ypad 
+        self.quitButton = Button(self.game, btntextcolor, btnbackcolor, x, y, w, h, label=_('Quit'), image='', border=True)
+        
+        # TODO: take screenshot
+        self.show = True
+        self.dirtyscreen = True
+        self.menuLoop()
+
+    def processMenuAction(self, mousePos):
+        # detecta cuando el mouse pasa sobre un RECT
+        if self.closeButton.clicked(mousePos):
+            self.show = False
+        elif self.saveButton.clicked(mousePos):
+            self.showSaveMenu()
+        elif self.loadButton.clicked(mousePos):
+            self.showLoadMenu()
+        elif self.audioCheck.clicked(mousePos):
+            self.changeAudio()
+        elif self.languageSelect.clicked(mousePos):
+            self.changeLanguage()
+        elif self.textSpeed.clicked(mousePos):
+            self.changeTextSpeed()
+        elif self.quitButton.clicked(mousePos):
+            self.show = False
+            self.game.doQuit()
+
+    def showSaveMenu(self):
+        print('save')
+        self.game.saveGame()
+        self.show = False
+        
+    def showLoadMenu(self):
+        print('load')
+        self.game.loadGame()
+        self.show = False
+
+    def changeAudio(self):
+        if self.audioCheck.checked:
+            self.game.enableAudio(True)
+        else:
+            self.game.enableAudio(False)
+        self.dirtyscreen = True
+
+    def changeLanguage(self):
+        #if self.languageSelect.selected != LANG:
+        self.game.changeLanguage(self.languageSelect.selected)
+        self.dirtyscreen = True
+        
+    def changeTextSpeed(self):
+        self.game.text_speed = self.textSpeed.value
+        self.dirtyscreen = True
+        
+    def menuLoop(self):
+        while self.game.run and self.show: # Menu Loop
+            dt = self.game.clock.tick(self.game.FPS / 3) / 1000 # Returns milliseconds between each call to 'tick'. The convert time to seconds.
+            
+            #self.dirtyscreen = False
+            events = pygame.event.get() # para el textInput
+            
+            for event in events:
+                if (event.type == pygame.QUIT):
+                    self.game.run = False
+                if (event.type == pygame.KEYUP):
+                    if (event.key == pygame.K_ESCAPE):
+                        events.remove(event) # no imprimo este caracter
+                        self.show = False
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        log('DEBUG',"Left mouse button DOWN",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                    elif event.button == 3:
+                        log('DEBUG',"Right mouse button DOWN",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        log('INFO',"Left mouse button UP",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+                        # Acciones de menu
+                        self.processMenuAction(event.pos)
+                        # detecta cuando el mouse pasa sobre un RECT
+                        #hover = textRect.collidepoint(pygame.mouse.get_pos())
+
+                    elif event.button == 3:
+                        log('DEBUG',"Right mouse button UP",'x='+str(event.pos[0]),'y='+str(event.pos[1]))
+            
+            if self.dirtyscreen:
+                self.draw_menu()
+                self.dirtyscreen = False
+            #self.show = False
+        #sleep(2)
+            
+    def draw_menu(self):
+        # Caja de Fondo x,y,w,h,color
+        w = self.width; h = self.height; x = self.x; y = self.y; color = self.bordercolor
+        self.game.drawRect(x, y, w, h, color)
+        x += self.border; y += self.border; w -= (self.border * 2); h -= (self.border * 2); color = self.innercolor
+        self.game.drawRect(x, y, w, h, color)
+        # boton CERRAR
+        self.closeButton.draw()
+        self.saveButton.draw()
+        self.loadButton.draw()
+        self.audioCheck.draw()
+        self.languageSelect.draw()
+        self.textSpeed.draw()
+        self.quitButton.draw()
+        
+        # Si hay un mensaje global, mostrarlo
+        #if self.show_message == True:
+        #    self.drawMessage()
+        
+        # Actualizar pantalla con los elementos de screen
+        pygame.display.update()
+            
+#=------------- GAME -------------=#
 class Game(object):
     def main(self, screen):
         # Variables globales
@@ -361,6 +659,7 @@ class Game(object):
         self.dirtyscreen = True
         # en vez de pygame.time.delay(100), usar clock para controlar los FPS
         self.FPS = 15 # Frames per second.
+        self.text_speed = 2.0 # default = 2, min = 1, max = 5
         # FPS <-> dt ( la constante es FPS*dt=1 )
         #  15 <-> 0.066
         #  20 <-> 0.05
@@ -410,6 +709,7 @@ class Game(object):
         # Cargar sonido
         #grillos = pygame.mixer.Sound('grillos.wav')
         log('DEBUG','Init sounds')
+        self.audioEnabled = True
         try:
             pygame.mixer.init()
             self.musica = pygame.mixer.music
@@ -436,13 +736,23 @@ class Game(object):
         self.draw_screen()
         sleep(1)
         if self.has_audio:
-            self.musica.stop()
+            self.stopMusic()
+            
         pygame.quit()
         quit()
 
     def drawText(self, texto, color, x, y):
         textosurf = self.smallfont.render(texto , True , color)
         self.screen.blit(textosurf, (x, y) )
+
+    def drawCenteredText(self, texto, color, centerrect):
+        textosurf = self.smallfont.render(texto , True , color)
+        #text_rect = text.get_rect(center=centerrect.center)
+        text_rect = textosurf.get_rect(center=centerrect.center)
+        #textosurf.get_rect().center = centerrect.center
+        #text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+
+        self.screen.blit(textosurf, text_rect)
 
     def drawTextOutline(self, texto : str, color, bordercolor, x, y, bold : bool, outline: int, centeredxy = False):
         font = self.smallfont
@@ -645,7 +955,7 @@ class Game(object):
         self.global_text = texto
         self.show_message = True
         self.dirtyscreen = True
-        self.message_time = int(2 + math.sqrt(len(self.global_text)) * (self.FPS/2)) # tiempo en pantala proporcional al texto
+        self.message_time = int(2 + math.sqrt(len(self.global_text)) * (self.FPS / self.text_speed)) # tiempo en pantala proporcional al texto
 
     def updateMessage(self):
         self.message_time -= 1
@@ -734,6 +1044,9 @@ class Game(object):
         TAB : shows your inventory.                                                     
         """)
         self.globalMessage(helpmessage)
+        
+    def showMenu(self):
+        Menu().main(self)
         
     def comandoGoRoom(self,direction):
         #check that they are allowed wherever they want to go
@@ -920,6 +1233,20 @@ class Game(object):
         if self.has_audio:
             self.musica.load(musicpath_ok)
 
+    def playMusic(self):
+        self.musica.play(-1) # If the loops is -1 then the music will repeat indefinitely.
+
+    def stopMusic(self):
+        self.musica.stop()
+        
+    def enableAudio(self,enabled): # enable or disable audio from user interface
+        if self.audioEnabled != enabled:
+            if enabled:
+                self.playMusic()
+            else:
+                self.stopMusic()
+            self.audioEnabled = enabled        
+
     def goToRoom(self,newroom):
         self.keys_allowed = False
         self.player.stopWalking()
@@ -944,7 +1271,8 @@ class Game(object):
         #musica.load(tema)
         if self.has_audio:
             self.loadMusic(tema)
-            self.musica.play(-1) # If the loops is -1 then the music will repeat indefinitely.
+            if self.audioEnabled:
+                self.playMusic()
             
         # obtengo coordenadas y direction del player al ingresar a este room desde el anterior
         if (self.currentRoom in self.rooms[newroom]['from']): # si no existe es porque hice loadGame
@@ -970,6 +1298,11 @@ class Game(object):
         surf = pygame.Surface([w, h], pygame.SRCALPHA)
         surf.fill(color)
         self.screen.blit(surf, [x,y,w,h])
+        # para detectar clicks
+        rect = surf.get_rect()
+        rect.x = x
+        rect.y = y
+        return rect
 
     def drawItem(self,x,y,w,h,itemimagefile):
         itemimage = loadImage(itemimagefile, int(w), int(h))
@@ -1547,7 +1880,9 @@ class Game(object):
                 if (event.type == pygame.KEYUP):
                     if (event.key == pygame.K_ESCAPE):
                         events.remove(event) # no imprimo este caracter
-                        self.run = False
+                        #self.run = False
+                        self.showMenu()
+                        self.dirtyscreen = True
                     if (event.key == pygame.K_TAB):
                         self.show_inventory = False
                         self.dirtyscreen = True
@@ -1560,21 +1895,14 @@ class Game(object):
                             self.textinput.input_string = self.previoustext # repetir el ultimo comando
                             self.textinput.cursor_position = largo
                     if (event.key == pygame.K_F11):
-                        LANG = 'ES'
-                        langES.install()
-                        _ = langES.gettext
-                        self.globalMessage('Idioma español seleccionado')
+                        self.changeLanguage('ES')
                     if (event.key == pygame.K_F12):
-                        LANG = 'EN'
-                        langEN.install()
-                        _ = langEN.gettext
-                        self.globalMessage('English language selected')
-                        
+                        self.changeLanguage('EN')                       
 
                 if (event.type == pygame.KEYDOWN):
                     if (event.key == pygame.K_ESCAPE):
                         events.remove(event) # no imprimo este caracter
-                        self.run = False
+                    #    self.run = False
                     if (event.key == pygame.K_TAB):
                         self.show_inventory = True
                         self.dirtyscreen = True
@@ -1673,7 +2001,22 @@ class Game(object):
             return True
         except IOError:
             return False
-    
+
+    def changeLanguage(self, lang):
+        global LANG
+        if LANG != lang:
+            if lang == 'ES':
+                langES.install()
+                _ = langES.gettext
+                self.globalMessage('Idioma español seleccionado')
+                log('DEBUG','Idioma español seleccionado')
+            elif lang == 'EN':
+                langEN.install()
+                _ = langEN.gettext
+                self.globalMessage('English language selected')
+                log('DEBUG','English language selected')
+            LANG = lang
+            
 def log(level, *arg):
     # log_level:
     #   NONE:  no escribir nada
